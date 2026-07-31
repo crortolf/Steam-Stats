@@ -1,0 +1,38 @@
+:root {
+  --steam-blue: #2297e0;
+}
+
+@font-face {
+  font-family: "OpenSans";
+  src: url("resources/Open_Sans/OpenSans-VariableFont_wdth\,wght.ttf")
+    format("truetype");
+  font-weight: 400;
+}
+
+* {
+  font-family: "OpenSans", serif;
+  color: white;
+}
+
+body {
+  background-color: black;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  color: var(--steam-blue);
+}
+
+.steam-page {
+  width: 800px;
+}
+
+#tabs-container {
+  display: flex;
+}
+
+#tabs-container > * {
+  padding: 20px;
+}
