@@ -9,6 +9,17 @@
   font-weight: 400;
 }
 
+@keyframes slidein {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
 * {
   font-family: "OpenSans", serif;
   color: white;
@@ -25,8 +36,73 @@ h6 {
   color: var(--steam-blue);
 }
 
+a {
+  color: inherit;
+  text-decoration: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+u {
+  color: inherit;
+}
+
+button {
+  color: black;
+  width: 60px;
+}
+
+input {
+  background-color: var(--steam-blue);
+  font-size: 20px;
+  color: black;
+}
+
 .steam-page {
   width: 800px;
+}
+
+.vertical-flex {
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-name-id {
+  display: flex;
+}
+
+.flex {
+  display: flex;
+  gap: 40px;
+}
+
+.node-username {
+  font-size: 40px;
+}
+
+.node-steam-id {
+  color: var(--steam-blue);
+  font-weight: 200;
+  font-size: 20px;
+}
+
+.node-status {
+  font-size: 20px;
+}
+
+.padded {
+  padding: 60px;
+  margin: 60px;
+}
+
+.steam-blue-border {
+  border: var(--steam-blue), solid, 6px;
+  align-content: center;
+  justify-content: center;
+  animation-name: slidein;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  opacity: 0;
 }
 
 #tabs-container {
@@ -35,4 +111,10 @@ h6 {
 
 #tabs-container > * {
   padding: 20px;
+  background-image: radial-gradient(black 60%, grey);
+}
+
+#connections-container {
+  align-content: center;
+  max-width: 1200px;
 }

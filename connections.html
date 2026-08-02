@@ -1,0 +1,56 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <title>Friend Connections</title>
+    <meta charset="UTF-8" />
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/png" href="resources/percent.png" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="connections.js"></script>
+  </head>
+
+  <body>
+    <h1>Steam Stats</h1>
+    <h3>Your go-to for all Steam number-based questions</h3>
+    <div id="tabs-container">
+      <h4>
+        <a href="landing.html">HOME</a>
+      </h4>
+      <h4>
+        <a href="connections.html"><u>FRIEND CONNECTIONS</u></a>
+      </h4>
+      <h4>
+        <a href="achievement.html">ACHIEVEMENT COMPARISON</a>
+      </h4>
+      <h4>
+        <a href="news.html">MY CIRCLE NEWS</a>
+      </h4>
+      <h4>
+        <a href="activity.html">RECENTLY PLAYED</a>
+      </h4>
+    </div>
+    <p>
+      Use this page to see if one user has any friends in common with another
+      non-friend user.
+    </p>
+    <form>
+      <label for="user-one-steam-id">First user ID:</label>
+      <input type="text" id="user-one-steam-id" name="user-one-steam-id" />
+      <label for="user-two-steam-id">Second user ID:</label>
+      <input type="text" id="user-two-steam-id" name="user-two-steam-id" />
+      <button type="button" onClick="findConnection()">Find</button>
+    </form>
+    <div id="connections-container"></div>
+    <template id="user-info-template">
+      <div class="flex padded steam-blue-border">
+        <img class="profile-image" />
+        <div class="vertical-flex">
+          <p class="node-status">Unknown status</p>
+          <p class="node-username">Username error</p>
+          <p class="node-steam-id">SteamID error</p>
+        </div>
+      </div>
+    </template>
+  </body>
+</html>
