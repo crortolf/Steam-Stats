@@ -99,10 +99,19 @@ input {
   border: var(--steam-blue), solid, 6px;
   align-content: center;
   justify-content: center;
+}
+
+.connection-animated {
   animation-name: slidein;
   animation-duration: 2s;
   animation-fill-mode: forwards;
   opacity: 0;
+}
+
+.news-article {
+  width: 200px;
+  height: 200px;
+  background-color: grey;
 }
 
 #tabs-container {
