@@ -1,5 +1,6 @@
 :root {
   --steam-blue: #2297e0;
+  --steam-grey: #2a2d34;
 }
 
 @font-face {
@@ -90,15 +91,13 @@ input {
   font-size: 20px;
 }
 
-.padded {
-  padding: 60px;
+.margin {
   margin: 60px;
 }
 
 .steam-blue-border {
   border: var(--steam-blue), solid, 6px;
-  align-content: center;
-  justify-content: center;
+  justify-content: left;
 }
 
 .connection-animated {
@@ -106,12 +105,23 @@ input {
   animation-duration: 2s;
   animation-fill-mode: forwards;
   opacity: 0;
+  width: fit-content;
+  padding: 30px;
 }
 
 .news-article {
-  width: 200px;
-  height: 200px;
-  background-color: grey;
+  width: 300px;
+  height: 300px;
+  background-color: var(--steam-grey);
+  flex: 0 0 auto;
+  padding: 15px 30px 15px 30px;
+  margin: 30px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+
+.overflow {
+  overflow-x: auto;
 }
 
 #tabs-container {
@@ -121,9 +131,4 @@ input {
 #tabs-container > * {
   padding: 20px;
   background-image: radial-gradient(black 60%, grey);
-}
-
-#connections-container {
-  align-content: center;
-  max-width: 1200px;
 }

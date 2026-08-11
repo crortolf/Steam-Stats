@@ -6,11 +6,12 @@ const cors = require("cors");
 const app = express();
 app.use(cors());
 
-app.get("/api/steam/*path", async (req, res) => {
+app.get("", async (req, res) => {
   try {
     const steamPath = req.params.path.join("/");
     console.log(req.query);
-    console.log(steamPath);
+    console.log();
+
     const response = await axios.get(
       `https://api.steampowered.com/` + steamPath,
       {
@@ -20,6 +21,7 @@ app.get("/api/steam/*path", async (req, res) => {
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: error.message });
+    console.log(error);
   }
 });
 

@@ -33,16 +33,20 @@
     <form>
       <label for="user-steam-id">First user ID:</label>
       <input type="text" id="user-steam-id" name="user-steam-id" />
-      <button type="button" onClick="displayNews()">Update</button>
+      <button type="button" onClick="getNews()">Update</button>
     </form>
     <div id="news-container"></div>
     <template id="game-news-template">
-      <div class="flex padded steam-blue-border">
+      <div class="flex margin steam-blue-border overflow">
         <img class="game-image" />
       </div>
     </template>
     <template id="news-card">
-      <div class="news-article">This is some news</div>
+      <div class="news-article">
+        <h4 class="news-title">News Title</h4>
+        <h5 class="news-date">News Date</h5>
+        <p class="news-content">news content</p>
+      </div>
     </template>
   </body>
 </html>
