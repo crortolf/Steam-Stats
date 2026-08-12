@@ -21,6 +21,8 @@ const displayNews = (newsByGame) => {
     const newsContainerInstance = document
       .getElementById("game-news-template")
       .content.cloneNode(true);
+    newsContainerInstance.querySelector(".game-image").src = game.appImage;
+    newsContainerInstance.querySelector(".game-image").alt = newsByGame.title;
     for (const article of game.news) {
       const articleInstance = document
         .getElementById("news-card")
@@ -38,6 +40,8 @@ const displayNews = (newsByGame) => {
     }
     container.appendChild(newsContainerInstance);
   }
+
+  console.log(newsByGame);
 };
 
 // const getNews = (appid, newsContainerInstance) => {

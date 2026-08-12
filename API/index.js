@@ -21,8 +21,6 @@ app.get("/GetConnection", (req, res) => {
 app.get("/GetNews", (req, res) => {
   try {
     news.getNews(req.query.steamid).then((articles) => {
-      console.log("articles are: ");
-      console.dir(articles, { depth: null });
       res.json(articles);
     });
   } catch (error) {

@@ -109,6 +109,10 @@ input {
   padding: 30px;
 }
 
+.game-image {
+  align-self: center;
+}
+
 .news-article {
   width: 300px;
   height: 300px;

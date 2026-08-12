@@ -16,36 +16,30 @@ const getNews = (steamId) => {
       for (friend of res.data.friendslist.friends) {
         populations.push(updatePlayingMap(friend, friendGames));
       }
-      return Promise.all(populations).then(() => {
-        const newsPromises = [];
-        //create, populate, display all news items
-        for (const appid in friendGames) {
-          newsPromises.push(requestNews(appid));
-        }
+      return Promise.all(populations)
+        .then(() => {
+          const newsPromises = [];
+          //create, populate, display all news items
+          for (const appid in friendGames) {
+            newsPromises.push(requestInfoNews(appid));
+          }
 
-        return Promise.all(newsPromises).then((res) => res.map(mapNewsResults));
-      });
-    })
-    .catch((error) => console.log(error));
-};
-
-const mapNewsResults = (gameNews) => {
-  const reducedNews = {};
-  reducedNews.appid = gameNews.appnews.appid;
-  reducedNews.news = [];
-  for (const newsArticle of gameNews.appnews.newsitems) {
-    reducedNews.news.push({
-      title: newsArticle.title,
-      author: newsArticle.author,
-      contents: newsArticle.contents,
-      date: newsArticle.date,
+          return Promise.all(newsPromises);
+        })
+        .catch((error) => console.log(error));
     });
-  }
-  for (const newsArticle of reducedNews.news) return reducedNews;
 };
 
-const requestNews = (appid, newsContainerInstance) => {
-  return axios
+const requestInfoNews = (appid) => {
+  const gameInfo = axios
+    .get("https://store.steampowered.com/api/appdetails/", {
+      params: {
+        appids: appid,
+      },
+    })
+    .then((res) => res.data);
+
+  const gameNews = axios
     .get("http://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/", {
       params: {
         appid: appid,
@@ -56,6 +50,27 @@ const requestNews = (appid, newsContainerInstance) => {
       },
     })
     .then((res) => res.data);
+
+  return Promise.all([gameInfo, gameNews]).then((res) => {
+    return mapNewsResults(res[0], res[1]);
+  });
+};
+
+const mapNewsResults = (gameInfo, gameNews) => {
+  const reducedNews = {};
+  reducedNews.appid = gameNews.appnews.appid;
+  reducedNews.appImage = gameInfo[reducedNews.appid].data.header_image;
+  reducedNews.title = gameInfo[reducedNews.appid].data.name;
+  reducedNews.news = [];
+  for (const newsArticle of gameNews.appnews.newsitems) {
+    reducedNews.news.push({
+      title: newsArticle.title,
+      author: newsArticle.author,
+      contents: newsArticle.contents,
+      date: newsArticle.date,
+    });
+  }
+  return reducedNews;
 };
 
 const updatePlayingMap = (friend, friendGames) => {
