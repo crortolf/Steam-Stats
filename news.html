@@ -42,6 +42,10 @@
     <div id="news-container"></div>
     <template id="game-news-template">
       <div class="flex margin steam-blue-border overflow">
+        <div class="player-container"></div>
+        <p style="align-self: center; width: 100px; flex-shrink: 0">
+          Are Playing:
+        </p>
         <img class="game-image" />
       </div>
     </template>
@@ -50,6 +54,12 @@
         <h4 class="news-title">News Title</h4>
         <h5 class="news-date">News Date</h5>
         <p class="news-content">news content</p>
+      </div>
+    </template>
+    <template id="player-display" class="flex">
+      <div class="player-instance flex">
+        <img class="player-avatar" />
+        <p class="player-name"></p>
       </div>
     </template>
   </body>

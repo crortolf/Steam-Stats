@@ -68,10 +68,6 @@ const findConnection = async (idOne, idTwo) => {
   if (connectionString !== false) return collectUserInfo(connectionString);
 
   return { result: "no relation" };
-
-  //testing data saved in tesetConnection
-
-  //collectUserInfo(testConnection);
 };
 
 const collectUserInfo = (orderedUserCodes) => {

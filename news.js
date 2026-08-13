@@ -6,6 +6,8 @@ const getNews = () => {
   const userId = document.getElementById("user-steam-id").value.trim();
   const friendGames = {};
 
+  container.innerHTML = "";
+
   axios
     .get("http://localhost:3001/GetNews", {
       params: {
@@ -16,6 +18,9 @@ const getNews = () => {
 };
 
 const displayNews = (newsByGame) => {
+  newsByGame.sort(
+    (gameOne, gameTwo) => gameTwo.players.length - gameOne.players.length,
+  );
   console.log(newsByGame);
   for (const game of newsByGame) {
     const newsContainerInstance = document
@@ -28,7 +33,6 @@ const displayNews = (newsByGame) => {
         .getElementById("news-card")
         .content.cloneNode(true);
 
-      console.log(article);
       const date = new Date(article.date * 1000);
       articleInstance.querySelector(".news-title").innerText = article.title;
       articleInstance.querySelector(".news-date").innerText =
@@ -38,56 +42,18 @@ const displayNews = (newsByGame) => {
 
       newsContainerInstance.querySelector(".flex").appendChild(articleInstance);
     }
+    const playerContainer =
+      newsContainerInstance.querySelector(".player-container");
+    for (const player of game.players) {
+      const playerInstance = document
+        .getElementById("player-display")
+        .content.cloneNode(true);
+      playerInstance.querySelector(".player-avatar").src = player.avatar;
+      playerInstance.querySelector(".player-avatar").alt =
+        player.name + "'s Profile Avatar";
+      playerInstance.querySelector(".player-name").innerText = player.name;
+      playerContainer.append(playerInstance);
+    }
     container.appendChild(newsContainerInstance);
   }
-
-  console.log(newsByGame);
 };
-
-// const getNews = (appid, newsContainerInstance) => {
-//   return axios
-//     .get("http://localhost:3001/api/steam/ISteamNews/GetNewsForApp/v0002/", {
-//       params: {
-//         appid: appid,
-//         count: 10,
-//         maxlength: 100,
-//         include_appinfo: true,
-//       },
-//     })
-//     .then((res) => {
-//       for (let i = 0; i < 3; i++) {
-//         const testInstance = document
-//           .getElementById("news-card")
-//           .content.cloneNode(true);
-//         newsContainerInstance.appendChild(testInstance);
-//       }
-//     });
-// };
-
-// const updatePlayingMap = (friend, friendGames) => {
-//   return axios
-//     .get(
-//       "http://localhost:3001/api/steam/IPlayerService/GetRecentlyPlayedGames/v0001/",
-//       {
-//         params: {
-//           key: myApiKey,
-//           steamid: friend.steamid,
-//           count: 3,
-//         },
-//       },
-//     )
-//     .then((res) => {
-//       if (
-//         res.data.response &&
-//         res.data.response.games &&
-//         res.data.response.games.length > 0
-//       ) {
-//         const games = res.data.response.games;
-//         for (const game of games) {
-//           console.log(game);
-//           if (game.appid in friendGames) friendGames[game.appid]++;
-//           else friendGames[game.appid] = 1;
-//         }
-//       }
-//     });
-// };
