@@ -1,0 +1,66 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <title>Steam Stats</title>
+    <meta charset="UTF-8" />
+    <link href="styles.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/png" href="resources/percent.png" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="news.js" defer></script>
+  </head>
+
+  <body>
+    <h1>Steam Stats</h1>
+    <h3>Your go-to for all Steam number-based questions</h3>
+    <div id="tabs-container">
+      <h4>
+        <a href="landing.html">HOME</a>
+      </h4>
+      <h4>
+        <a href="connections.html">FRIEND CONNECTIONS</a>
+      </h4>
+      <h4>
+        <a href="achievement.html">ACHIEVEMENT COMPARISON</a>
+      </h4>
+      <h4>
+        <a href="news.html"><u>MY CIRCLE NEWS</u></a>
+      </h4>
+      <h4>
+        <a href="activity.html">RECENTLY PLAYED</a>
+      </h4>
+    </div>
+    <p>
+      Enter your steamid to stay up to date with the games your friends have
+      been playing.
+    </p>
+    <form>
+      <label for="user-steam-id">First user ID:</label>
+      <input type="text" id="user-steam-id" name="user-steam-id" />
+      <button type="button" onClick="getNews()">Update</button>
+    </form>
+    <div id="news-container"></div>
+    <template id="game-news-template">
+      <div class="flex margin steam-blue-border overflow">
+        <div class="player-container"></div>
+        <p style="align-self: center; width: 100px; flex-shrink: 0">
+          Are Playing:
+        </p>
+        <img class="game-image" />
+      </div>
+    </template>
+    <template id="news-card">
+      <div class="news-article">
+        <h4 class="news-title">News Title</h4>
+        <h5 class="news-date">News Date</h5>
+        <p class="news-content">news content</p>
+      </div>
+    </template>
+    <template id="player-display" class="flex">
+      <div class="player-instance flex">
+        <img class="player-avatar" />
+        <p class="player-name"></p>
+      </div>
+    </template>
+  </body>
+</html>

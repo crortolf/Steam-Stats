@@ -1,0 +1,148 @@
+:root {
+  --steam-blue: #2297e0;
+  --steam-grey: #2a2d34;
+}
+
+@font-face {
+  font-family: "OpenSans";
+  src: url("resources/Open_Sans/OpenSans-VariableFont_wdth\,wght.ttf")
+    format("truetype");
+  font-weight: 400;
+}
+
+@keyframes slidein {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+* {
+  font-family: "OpenSans", serif;
+  color: white;
+}
+
+body {
+  background-color: black;
+}
+
+h3,
+h4,
+h5,
+h6 {
+  color: var(--steam-blue);
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+u {
+  color: inherit;
+}
+
+button {
+  color: black;
+  width: 60px;
+}
+
+input {
+  background-color: var(--steam-blue);
+  font-size: 20px;
+  color: black;
+}
+
+.steam-page {
+  width: 800px;
+}
+
+.vertical-flex {
+  display: flex;
+  flex-direction: column;
+}
+
+.photo-name-id {
+  display: flex;
+}
+
+.flex {
+  display: flex;
+  gap: 40px;
+}
+
+.node-username {
+  font-size: 40px;
+}
+
+.node-steam-id {
+  color: var(--steam-blue);
+  font-weight: 200;
+  font-size: 20px;
+}
+
+.node-status {
+  font-size: 20px;
+}
+
+.margin {
+  margin: 60px;
+}
+
+.steam-blue-border {
+  border: var(--steam-blue), solid, 6px;
+  justify-content: left;
+}
+
+.connection-animated {
+  animation-name: slidein;
+  animation-duration: 2s;
+  animation-fill-mode: forwards;
+  opacity: 0;
+  width: fit-content;
+  padding: 30px;
+}
+
+.game-image {
+  align-self: center;
+}
+
+.news-article {
+  width: 300px;
+  height: 300px;
+  background-color: var(--steam-grey);
+  flex: 0 0 auto;
+  padding: 15px 30px 15px 30px;
+  margin: 30px;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+}
+
+.overflow {
+  overflow-x: auto;
+}
+
+.player-instance {
+  height: 50px;
+}
+
+.player-container {
+  flex: 0 0 auto;
+  overflow-y: auto;
+  align-self: center;
+}
+
+#tabs-container {
+  display: flex;
+}
+
+#tabs-container > * {
+  padding: 20px;
+  background-image: radial-gradient(black 60%, grey);
+}

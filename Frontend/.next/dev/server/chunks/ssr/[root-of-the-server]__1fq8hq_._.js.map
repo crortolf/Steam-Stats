@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 13, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Chris/OneDrive/Desktop/Repositories/Frontend/app/favicon.ico.mjs%20(structured%20image%20object)"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 96, height: 96 }\n"],"names":["src","width","height"],"mappings":";;;;AAAA;;uCACe;IAAEA,KAAAA,mIAAG;IAAEC,OAAO;IAAIC,QAAQ;AAAG"}},
+    {"offset": {"line": 28, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/Chris/OneDrive/Desktop/Repositories/Frontend/app/network/page.tsx"],"sourcesContent":["import { FriendNetwork } from '@/components/friend-network'\n\nexport default function NetworkPage() {\n  return (\n    <main className=\"mx-auto max-w-7xl px-4 py-8\">\n      <header className=\"mb-6\">\n        <h1 className=\"text-2xl font-bold tracking-tight text-foreground md:text-3xl\">\n          Friend Network\n        </h1>\n        <p className=\"mt-1 text-muted-foreground\">\n          Your social graph at a glance. Nodes are friends, edges are connections — hover to\n          highlight, click to inspect.\n        </p>\n      </header>\n      <FriendNetwork />\n    </main>\n  )\n}\n"],"names":["NetworkPage","className"],"mappings":";;;;;AAAA;;;AAEe,SAASA;IACtB,qBACE,6VAAC;QAAKC,WAAU;;0BACd,6VAAC;gBAAOA,WAAU;;kCAChB,6VAAC;wBAAGA,WAAU;kCAAgE;;;;;;kCAG9E,6VAAC;wBAAEA,WAAU;kCAA6B;;;;;;;;;;;;0BAK5C,6VAAC,iJAAa;;;;;;;;;;;AAGpB"}}]
+}
