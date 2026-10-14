@@ -11,10 +11,8 @@ export type FriendStatus =
   | "Looking to play";
 
 export type Game = {
-  id: string;
   title: string;
-  capsule: string;
-  genre: string;
+  image: string;
   developer: string;
   appId: number;
 };
@@ -71,50 +69,38 @@ export type Achievement = {
 
 export const games: Game[] = [
   {
-    id: "nebula-drift",
     title: "Nebula Drift",
-    capsule: "/games/nebula-drift.png",
-    genre: "Space Combat",
+    image: "/games/nebula-drift.png",
     developer: "Lumen Interactive",
     appId: 730100,
   },
   {
-    id: "ashen-kingdoms",
     title: "Ashen Kingdoms",
-    capsule: "/games/ashen-kingdoms.png",
-    genre: "Action RPG",
+    image: "/games/ashen-kingdoms.png",
     developer: "Emberforge Studios",
     appId: 550220,
   },
   {
-    id: "neon-circuit",
     title: "Neon Circuit",
-    capsule: "/games/neon-circuit.png",
-    genre: "Racing",
+    image: "/games/neon-circuit.png",
     developer: "Pulse Games",
     appId: 442310,
   },
   {
-    id: "verdant-hollow",
     title: "Verdant Hollow",
-    capsule: "/games/verdant-hollow.png",
-    genre: "Cozy Survival",
+    image: "/games/verdant-hollow.png",
     developer: "Willow & Oak",
     appId: 903440,
   },
   {
-    id: "iron-vanguard",
     title: "Iron Vanguard",
-    capsule: "/games/iron-vanguard.png",
-    genre: "Tactical Shooter",
+    image: "/games/iron-vanguard.png",
     developer: "Cobalt Line",
     appId: 128870,
   },
   {
-    id: "shadowline",
     title: "Shadowline",
-    capsule: "/games/shadowline.png",
-    genre: "Stealth",
+    image: "/games/shadowline.png",
     developer: "Nightjar Collective",
     appId: 667012,
   },

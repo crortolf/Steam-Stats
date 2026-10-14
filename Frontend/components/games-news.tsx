@@ -4,43 +4,29 @@ import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { Clock, Newspaper } from 'lucide-react'
 import {
-  games,
-  recentPlays,
-  news,
-  getGame,
-  getFriend,
-  type FriendStatus,
+  NewsItem,
+  Game,
 } from '@/lib/mock-data'
 import { GameCapsule } from '@/components/game-capsule'
 import { StatusDot } from '@/components/status-dot'
 import { cn } from '@/lib/utils'
+import axios from 'axios'
 
-export function GamesNews() {
-  const [filter, setFilter] = useState<string>('all')
+//TODO: replace with persistant user data
+const TEMP_USERDATA = 76561198045843433
 
-  const filteredPlays = useMemo(
-    () => (filter === 'all' ? recentPlays : recentPlays.filter((p) => p.gameId === filter)),
-    [filter],
-  )
-  const filteredNews = useMemo(
-    () => (filter === 'all' ? news : news.filter((n) => n.gameId === filter)),
-    [filter],
-  )
+export async function GamesNews() {
+  const games: Game[] = await axios.get("http://localhost:5011/circleNews/getNews", {
+    params: {
+      id: TEMP_USERDATA,
+    }
+  }).then(res => {
+    return res.data
+  });
 
+  const filteredNews: NewsItem[] = [];
+  
   return (
-    <div>
-      {/* filter chips */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <Chip active={filter === 'all'} onClick={() => setFilter('all')}>
-          All games
-        </Chip>
-        {games.map((g) => (
-          <Chip key={g.id} active={filter === g.id} onClick={() => setFilter(g.id)}>
-            {g.title}
-          </Chip>
-        ))}
-      </div>
-
       <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr]">
         {/* Recently played by friends */}
         <section>
@@ -48,7 +34,7 @@ export function GamesNews() {
             <Clock className="size-4" /> Recently played by friends
           </h2>
           <ul className="flex flex-col gap-3">
-            {filteredPlays.map((p, i) => {
+            {games.map((p, i) => {
               const game = getGame(p.gameId)
               const friend = getFriend(p.friendId)
               if (!game || !friend) return null
@@ -92,7 +78,7 @@ export function GamesNews() {
                 </li>
               )
             })}
-            {filteredPlays.length === 0 && (
+            {games.length === 0 && (
               <li className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                 No friends have played this recently.
               </li>
