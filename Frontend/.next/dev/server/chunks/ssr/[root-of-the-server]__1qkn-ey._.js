@@ -566,11 +566,11 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2e$ts__$5b$app$
 ;
 ;
 ;
-function GameCapsule({ game, className, priority = false, sizes = '(max-width: 768px) 100vw, 320px' }) {
+function GameCapsule({ game, className, priority = false, sizes = "(max-width: 768px) 100vw, 320px" }) {
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cn"])('relative aspect-[460/215] w-full overflow-hidden rounded-md', className),
+        className: (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$utils$2e$ts__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["cn"])("relative aspect-[460/215] w-full overflow-hidden rounded-md", className),
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$rsc$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__["default"], {
-            src: game.capsule || '/placeholder.svg',
+            src: game.appImage || "/placeholder.svg",
             alt: `${game.title} cover art`,
             fill: true,
             sizes: sizes,
@@ -578,7 +578,7 @@ function GameCapsule({ game, className, priority = false, sizes = '(max-width: 7
             className: "object-cover"
         }, void 0, false, {
             fileName: "[project]/components/game-capsule.tsx",
-            lineNumber: 18,
+            lineNumber: 23,
             columnNumber: 7
         }, this)
     }, void 0, false, {
@@ -768,7 +768,7 @@ const friends = [
         status: "Online",
         level: 62,
         countryFlag: "🇨🇦",
-        currentGameId: "ashen-kingdoms",
+        currentAppId: 550220,
         mutualFriendIds: [
             "f2",
             "f3",
@@ -797,7 +797,7 @@ const friends = [
         status: "Online",
         level: 51,
         countryFlag: "🇩🇪",
-        currentGameId: "neon-circuit",
+        currentAppId: 442310,
         mutualFriendIds: [
             "f1",
             "f2",
@@ -826,7 +826,7 @@ const friends = [
         status: "Online",
         level: 74,
         countryFlag: "🇯🇵",
-        currentGameId: "iron-vanguard",
+        currentAppId: 128870,
         mutualFriendIds: [
             "f3",
             "f8",
@@ -868,7 +868,7 @@ const friends = [
         status: "Online",
         level: 56,
         countryFlag: "🇧🇷",
-        currentGameId: "nebula-drift",
+        currentAppId: 730100,
         mutualFriendIds: [
             "f3",
             "f5"
@@ -882,7 +882,7 @@ const friends = [
         status: "Online",
         level: 41,
         countryFlag: "🇦🇺",
-        currentGameId: "verdant-hollow",
+        currentAppId: 903440,
         mutualFriendIds: [
             "f5",
             "f7"
@@ -894,61 +894,61 @@ const userFriendIds = friends.map((f)=>f.id);
 const recentPlays = [
     {
         friendId: "f1",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         hoursTwoWeeks: 22.4,
         lastPlayed: "Playing now"
     },
     {
         friendId: "f3",
-        gameId: "neon-circuit",
+        appId: 442310,
         hoursTwoWeeks: 14.1,
         lastPlayed: "Playing now"
     },
     {
         friendId: "f5",
-        gameId: "iron-vanguard",
+        appId: 128870,
         hoursTwoWeeks: 31.7,
         lastPlayed: "Playing now"
     },
     {
         friendId: "f8",
-        gameId: "nebula-drift",
+        appId: 730100,
         hoursTwoWeeks: 18.9,
         lastPlayed: "Playing now"
     },
     {
         friendId: "f9",
-        gameId: "verdant-hollow",
+        appId: 903440,
         hoursTwoWeeks: 9.3,
         lastPlayed: "2 hours ago"
     },
     {
         friendId: "f2",
-        gameId: "iron-vanguard",
+        appId: 128870,
         hoursTwoWeeks: 6.5,
         lastPlayed: "Yesterday"
     },
     {
         friendId: "f7",
-        gameId: "nebula-drift",
+        appId: 730100,
         hoursTwoWeeks: 11.2,
         lastPlayed: "Yesterday"
     },
     {
         friendId: "f4",
-        gameId: "shadowline",
+        appId: 667012,
         hoursTwoWeeks: 4.8,
         lastPlayed: "3 days ago"
     },
     {
         friendId: "f6",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         hoursTwoWeeks: 7.6,
         lastPlayed: "4 days ago"
     },
     {
         friendId: "f1",
-        gameId: "shadowline",
+        appId: 667012,
         hoursTwoWeeks: 3.2,
         lastPlayed: "5 days ago"
     }
@@ -956,7 +956,7 @@ const recentPlays = [
 const news = [
     {
         id: "n1",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         title: "Ashen Kingdoms — The Emberfall Update is live",
         source: "Emberforge Studios",
         date: "Aug 14, 2026",
@@ -964,7 +964,7 @@ const news = [
     },
     {
         id: "n2",
-        gameId: "nebula-drift",
+        appId: 730100,
         title: "Nebula Drift Season 4: Voidrunners begins",
         source: "Lumen Interactive",
         date: "Aug 13, 2026",
@@ -972,7 +972,7 @@ const news = [
     },
     {
         id: "n3",
-        gameId: "neon-circuit",
+        appId: 442310,
         title: "Neon Circuit patch 2.7 rebalances drift scoring",
         source: "Pulse Games",
         date: "Aug 11, 2026",
@@ -980,7 +980,7 @@ const news = [
     },
     {
         id: "n4",
-        gameId: "iron-vanguard",
+        appId: 128870,
         title: "Iron Vanguard competitive ladder resets for Act III",
         source: "Cobalt Line",
         date: "Aug 10, 2026",
@@ -988,7 +988,7 @@ const news = [
     },
     {
         id: "n5",
-        gameId: "verdant-hollow",
+        appId: 903440,
         title: "Verdant Hollow: Autumn Harvest festival returns",
         source: "Willow & Oak",
         date: "Aug 8, 2026",
@@ -996,7 +996,7 @@ const news = [
     },
     {
         id: "n6",
-        gameId: "shadowline",
+        appId: 667012,
         title: "Shadowline developer diary: designing silent takedowns",
         source: "Nightjar Collective",
         date: "Aug 6, 2026",
@@ -1004,7 +1004,7 @@ const news = [
     },
     {
         id: "n7",
-        gameId: "nebula-drift",
+        appId: 730100,
         title: "Community spotlight: the Nebula Drift photo contest winners",
         source: "Lumen Interactive",
         date: "Aug 4, 2026",
@@ -1014,7 +1014,7 @@ const news = [
 const achievements = [
     {
         id: "a1",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         name: "First Ember",
         description: "Light the first bonfire beyond the Ashen Gate.",
         globalPct: 78.4,
@@ -1024,7 +1024,7 @@ const achievements = [
     },
     {
         id: "a2",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         name: "Parry Master",
         description: "Perfectly parry 100 attacks.",
         globalPct: 31.2,
@@ -1034,7 +1034,7 @@ const achievements = [
     },
     {
         id: "a3",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         name: "The Long Dark",
         description: "Defeat the Warden of Ash without taking damage.",
         globalPct: 4.7,
@@ -1043,7 +1043,7 @@ const achievements = [
     },
     {
         id: "a4",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         name: "Ashbringer",
         description: "Reach the true ending.",
         globalPct: 12.9,
@@ -1053,7 +1053,7 @@ const achievements = [
     },
     {
         id: "a5",
-        gameId: "ashen-kingdoms",
+        appId: 550220,
         name: "Completionist",
         description: "Collect every relic in the world.",
         globalPct: 2.1,
@@ -1062,7 +1062,7 @@ const achievements = [
     },
     {
         id: "a6",
-        gameId: "nebula-drift",
+        appId: 730100,
         name: "Maiden Voyage",
         description: "Complete the tutorial jump.",
         globalPct: 94.1,
@@ -1072,7 +1072,7 @@ const achievements = [
     },
     {
         id: "a7",
-        gameId: "nebula-drift",
+        appId: 730100,
         name: "Ace Pilot",
         description: "Win 50 dogfights.",
         globalPct: 27.8,
@@ -1082,7 +1082,7 @@ const achievements = [
     },
     {
         id: "a8",
-        gameId: "nebula-drift",
+        appId: 730100,
         name: "Deep Void",
         description: "Clear the Deep Void raid on legendary.",
         globalPct: 3.3,
@@ -1091,7 +1091,7 @@ const achievements = [
     },
     {
         id: "a9",
-        gameId: "nebula-drift",
+        appId: 730100,
         name: "Fleet Commander",
         description: "Lead a full squadron to victory.",
         globalPct: 15.6,
@@ -1101,7 +1101,7 @@ const achievements = [
     },
     {
         id: "a10",
-        gameId: "shadowline",
+        appId: 667012,
         name: "Ghost",
         description: "Finish a mission fully undetected.",
         globalPct: 22.5,
@@ -1111,7 +1111,7 @@ const achievements = [
     },
     {
         id: "a11",
-        gameId: "shadowline",
+        appId: 667012,
         name: "No Alarms",
         description: "Complete the heist without triggering a single alarm.",
         globalPct: 6.8,
@@ -1120,7 +1120,7 @@ const achievements = [
     },
     {
         id: "a12",
-        gameId: "shadowline",
+        appId: 667012,
         name: "Silent Legend",
         description: "Earn every stealth commendation.",
         globalPct: 1.9,
@@ -1129,7 +1129,7 @@ const achievements = [
     }
 ];
 function getGame(id) {
-    return games.find((g)=>g.id === id);
+    return games.find((g)=>g.appId === id);
 }
 function getFriend(id) {
     return friends.find((f)=>f.id === id);

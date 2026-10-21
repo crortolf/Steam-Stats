@@ -24,7 +24,7 @@ export type Friend = {
   status: FriendStatus;
   level: number;
   countryFlag: string;
-  currentGameId?: string;
+  currentAppId?: number;
   mutualFriendIds: string[];
   totalPlaytime: number; // hours
 };
@@ -42,14 +42,14 @@ export type CurrentUser = {
 
 export type RecentPlay = {
   friendId: string;
-  gameId: string;
+  appId: number;
   hoursTwoWeeks: number;
   lastPlayed: string;
 };
 
 export type NewsItem = {
   id: string;
-  gameId: string;
+  appId: number;
   title: string;
   source: string;
   date: string;
@@ -58,7 +58,7 @@ export type NewsItem = {
 
 export type Achievement = {
   id: string;
-  gameId: string;
+  appId: number;
   name: string;
   description: string;
   globalPct: number; // % of all players who unlocked
@@ -125,7 +125,7 @@ export const friends: Friend[] = [
     status: "Online",
     level: 62,
     countryFlag: "🇨🇦",
-    currentGameId: "ashen-kingdoms",
+    currentAppId: 550220,
     mutualFriendIds: ["f2", "f3", "f7"],
     totalPlaytime: 3120,
   },
@@ -146,7 +146,7 @@ export const friends: Friend[] = [
     status: "Online",
     level: 51,
     countryFlag: "🇩🇪",
-    currentGameId: "neon-circuit",
+    currentAppId: 442310,
     mutualFriendIds: ["f1", "f2", "f5", "f8"],
     totalPlaytime: 2450,
   },
@@ -167,7 +167,7 @@ export const friends: Friend[] = [
     status: "Online",
     level: 74,
     countryFlag: "🇯🇵",
-    currentGameId: "iron-vanguard",
+    currentAppId: 128870,
     mutualFriendIds: ["f3", "f8", "f9"],
     totalPlaytime: 5210,
   },
@@ -198,7 +198,7 @@ export const friends: Friend[] = [
     status: "Online",
     level: 56,
     countryFlag: "🇧🇷",
-    currentGameId: "nebula-drift",
+    currentAppId: 730100,
     mutualFriendIds: ["f3", "f5"],
     totalPlaytime: 3380,
   },
@@ -209,7 +209,7 @@ export const friends: Friend[] = [
     status: "Online",
     level: 41,
     countryFlag: "🇦🇺",
-    currentGameId: "verdant-hollow",
+    currentAppId: 903440,
     mutualFriendIds: ["f5", "f7"],
     totalPlaytime: 1670,
   },
@@ -221,61 +221,61 @@ export const userFriendIds: string[] = friends.map((f) => f.id);
 export const recentPlays: RecentPlay[] = [
   {
     friendId: "f1",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     hoursTwoWeeks: 22.4,
     lastPlayed: "Playing now",
   },
   {
     friendId: "f3",
-    gameId: "neon-circuit",
+    appId: 442310,
     hoursTwoWeeks: 14.1,
     lastPlayed: "Playing now",
   },
   {
     friendId: "f5",
-    gameId: "iron-vanguard",
+    appId: 128870,
     hoursTwoWeeks: 31.7,
     lastPlayed: "Playing now",
   },
   {
     friendId: "f8",
-    gameId: "nebula-drift",
+    appId: 730100,
     hoursTwoWeeks: 18.9,
     lastPlayed: "Playing now",
   },
   {
     friendId: "f9",
-    gameId: "verdant-hollow",
+    appId: 903440,
     hoursTwoWeeks: 9.3,
     lastPlayed: "2 hours ago",
   },
   {
     friendId: "f2",
-    gameId: "iron-vanguard",
+    appId: 128870,
     hoursTwoWeeks: 6.5,
     lastPlayed: "Yesterday",
   },
   {
     friendId: "f7",
-    gameId: "nebula-drift",
+    appId: 730100,
     hoursTwoWeeks: 11.2,
     lastPlayed: "Yesterday",
   },
   {
     friendId: "f4",
-    gameId: "shadowline",
+    appId: 667012,
     hoursTwoWeeks: 4.8,
     lastPlayed: "3 days ago",
   },
   {
     friendId: "f6",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     hoursTwoWeeks: 7.6,
     lastPlayed: "4 days ago",
   },
   {
     friendId: "f1",
-    gameId: "shadowline",
+    appId: 667012,
     hoursTwoWeeks: 3.2,
     lastPlayed: "5 days ago",
   },
@@ -284,7 +284,7 @@ export const recentPlays: RecentPlay[] = [
 export const news: NewsItem[] = [
   {
     id: "n1",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     title: "Ashen Kingdoms — The Emberfall Update is live",
     source: "Emberforge Studios",
     date: "Aug 14, 2026",
@@ -293,7 +293,7 @@ export const news: NewsItem[] = [
   },
   {
     id: "n2",
-    gameId: "nebula-drift",
+    appId: 730100,
     title: "Nebula Drift Season 4: Voidrunners begins",
     source: "Lumen Interactive",
     date: "Aug 13, 2026",
@@ -302,7 +302,7 @@ export const news: NewsItem[] = [
   },
   {
     id: "n3",
-    gameId: "neon-circuit",
+    appId: 442310,
     title: "Neon Circuit patch 2.7 rebalances drift scoring",
     source: "Pulse Games",
     date: "Aug 11, 2026",
@@ -311,7 +311,7 @@ export const news: NewsItem[] = [
   },
   {
     id: "n4",
-    gameId: "iron-vanguard",
+    appId: 128870,
     title: "Iron Vanguard competitive ladder resets for Act III",
     source: "Cobalt Line",
     date: "Aug 10, 2026",
@@ -320,7 +320,7 @@ export const news: NewsItem[] = [
   },
   {
     id: "n5",
-    gameId: "verdant-hollow",
+    appId: 903440,
     title: "Verdant Hollow: Autumn Harvest festival returns",
     source: "Willow & Oak",
     date: "Aug 8, 2026",
@@ -329,7 +329,7 @@ export const news: NewsItem[] = [
   },
   {
     id: "n6",
-    gameId: "shadowline",
+    appId: 667012,
     title: "Shadowline developer diary: designing silent takedowns",
     source: "Nightjar Collective",
     date: "Aug 6, 2026",
@@ -338,7 +338,7 @@ export const news: NewsItem[] = [
   },
   {
     id: "n7",
-    gameId: "nebula-drift",
+    appId: 730100,
     title: "Community spotlight: the Nebula Drift photo contest winners",
     source: "Lumen Interactive",
     date: "Aug 4, 2026",
@@ -350,7 +350,7 @@ export const news: NewsItem[] = [
 export const achievements: Achievement[] = [
   {
     id: "a1",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     name: "First Ember",
     description: "Light the first bonfire beyond the Ashen Gate.",
     globalPct: 78.4,
@@ -360,7 +360,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a2",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     name: "Parry Master",
     description: "Perfectly parry 100 attacks.",
     globalPct: 31.2,
@@ -370,7 +370,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a3",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     name: "The Long Dark",
     description: "Defeat the Warden of Ash without taking damage.",
     globalPct: 4.7,
@@ -379,7 +379,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a4",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     name: "Ashbringer",
     description: "Reach the true ending.",
     globalPct: 12.9,
@@ -389,7 +389,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a5",
-    gameId: "ashen-kingdoms",
+    appId: 550220,
     name: "Completionist",
     description: "Collect every relic in the world.",
     globalPct: 2.1,
@@ -398,7 +398,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a6",
-    gameId: "nebula-drift",
+    appId: 730100,
     name: "Maiden Voyage",
     description: "Complete the tutorial jump.",
     globalPct: 94.1,
@@ -408,7 +408,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a7",
-    gameId: "nebula-drift",
+    appId: 730100,
     name: "Ace Pilot",
     description: "Win 50 dogfights.",
     globalPct: 27.8,
@@ -418,7 +418,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a8",
-    gameId: "nebula-drift",
+    appId: 730100,
     name: "Deep Void",
     description: "Clear the Deep Void raid on legendary.",
     globalPct: 3.3,
@@ -427,7 +427,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a9",
-    gameId: "nebula-drift",
+    appId: 730100,
     name: "Fleet Commander",
     description: "Lead a full squadron to victory.",
     globalPct: 15.6,
@@ -437,7 +437,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a10",
-    gameId: "shadowline",
+    appId: 667012,
     name: "Ghost",
     description: "Finish a mission fully undetected.",
     globalPct: 22.5,
@@ -447,7 +447,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a11",
-    gameId: "shadowline",
+    appId: 667012,
     name: "No Alarms",
     description: "Complete the heist without triggering a single alarm.",
     globalPct: 6.8,
@@ -456,7 +456,7 @@ export const achievements: Achievement[] = [
   },
   {
     id: "a12",
-    gameId: "shadowline",
+    appId: 667012,
     name: "Silent Legend",
     description: "Earn every stealth commendation.",
     globalPct: 1.9,
@@ -467,8 +467,8 @@ export const achievements: Achievement[] = [
 
 // ---- helpers ----
 
-export function getGame(id: string): Game | undefined {
-  return games.find((g) => g.id === id);
+export function getGame(id: number): Game | undefined {
+  return games.find((g) => g.appId === id);
 }
 
 export function getFriend(id: string): Friend | undefined {
