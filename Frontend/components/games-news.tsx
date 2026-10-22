@@ -16,7 +16,7 @@ export function GamesNews() {
   const [gamesNews, setGamesNews] = useState<GameNews[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedGame, setSelectedGame] = useState(-1);
+  const [selectedGame, setSelectedGame] = useState<GameNews | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,6 +36,7 @@ export function GamesNews() {
         })
         .finally(() => {
           setLoading(false);
+          console.log(gamesNews);
         });
     }
 
@@ -43,9 +44,12 @@ export function GamesNews() {
     return () => controller.abort(); // cleanup
   }, []); // empty array = run once on mount
 
+  useEffect(() => {
+    console.log(selectedGame);
+  }, [selectedGame]);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
-  console.log(gamesNews);
 
   const filteredNews: NewsItem[] = [];
 
@@ -56,12 +60,16 @@ export function GamesNews() {
         <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           <Clock className="size-4" /> Recently played by friends
         </h2>
-        <ul className="flex flex-col gap-3">
+        <ul className="flex flex-col gap-3 h-170 overflow-y-scroll">
           {gamesNews.map((p) => {
             return (
               <li
                 key={`${p.game.appid}`}
-                className="flex gap-3 rounded-lg border border-border bg-card p-3"
+                className="flex gap-3 rounded-lg border border-border bg-card p-3 hover:border-primary/40"
+                onClick={() => {
+                  if (selectedGame === p) setSelectedGame(null);
+                  else setSelectedGame(p);
+                }}
               >
                 <div className="w-28 shrink-0 sm:w-36">
                   <GameCapsule game={p.game} sizes="144px" />
@@ -93,56 +101,49 @@ export function GamesNews() {
         <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           <Newspaper className="size-4" /> Game news
         </h2>
-        {filteredNews.length === 0 ? (
+        {selectedGame === null || selectedGame.news.length === 0 ? (
           <div>Select a game for News</div>
         ) : (
-          <ul className="flex flex-col gap-3">
-            {filteredNews.map((n) => {
-              const game = getGame(n.appId);
+          <ul className="gap-3 overflow-y-scroll h-170">
+            {selectedGame.news.map((n) => {
               return (
                 <li
-                  key={n.id}
+                  //key={n}
                   className="overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40"
                 >
                   <article className="flex flex-col">
-                    {game && (
-                      <div className="relative aspect-[460/215] w-full">
-                        <Image
-                          src={game.image || "/placeholder.svg"}
-                          alt=""
-                          fill
-                          sizes="(max-width: 1024px) 100vw, 480px"
-                          className="object-cover"
-                        />
-                        <span className="absolute left-2 top-2 rounded bg-popover/90 px-2 py-0.5 text-xs font-medium text-foreground backdrop-blur">
-                          {game.title}
-                        </span>
-                      </div>
-                    )}
+                    <div className="relative aspect-[460/215] w-full">
+                      <Image
+                        src={selectedGame.game.appImage || "/placeholder.svg"}
+                        alt=""
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 480px"
+                        className="object-cover"
+                      />
+                      <span className="absolute left-2 top-2 rounded bg-popover/90 px-2 py-0.5 text-xs font-medium text-foreground backdrop-blur">
+                        {selectedGame.game.title}
+                      </span>
+                    </div>
                     <div className="p-4">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span className="font-medium text-primary">
-                          {n.source}
+                          Author: {n.author}
                         </span>
                         <span aria-hidden>·</span>
-                        <time>{n.date}</time>
+
+                        <time>{new Date(n.date).toLocaleString()}</time>
                       </div>
                       <h3 className="mt-1 text-pretty font-semibold leading-snug text-foreground">
                         {n.title}
                       </h3>
                       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                        {n.snippet}
+                        {n.contents.slice(0, 50)}
                       </p>
                     </div>
                   </article>
                 </li>
               );
             })}
-            {/**filteredNews.length === 0 && (
-            <li className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              No news for this game right now.
-            </li>
-          )**/}
           </ul>
         )}
       </section>

@@ -1,61 +1,63 @@
-'use client'
+"use client";
 
-import { useMemo, useState } from 'react'
-import { Trophy, Lock, Check, Globe, Users } from 'lucide-react'
+import { useMemo, useState } from "react";
+import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
 import {
   achievements,
   games,
   getGame,
   type Achievement,
-} from '@/lib/mock-data'
-import { GameCapsule } from '@/components/game-capsule'
+} from "@/lib/mock-data";
+import { GameCapsule } from "@/components/game-capsule";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 // Only games that actually have achievements in the dataset.
-const gamesWithAchievements = games.filter((g) => achievements.some((a) => a.gameId === g.id))
+const gamesWithAchievements = games.filter((g) =>
+  achievements.some((a) => a.appId === g.appId),
+);
 
 function avg(nums: number[]) {
-  if (nums.length === 0) return 0
-  return nums.reduce((s, n) => s + n, 0) / nums.length
+  if (nums.length === 0) return 0;
+  return nums.reduce((s, n) => s + n, 0) / nums.length;
 }
 
 export function AchievementsView() {
-  const [gameId, setGameId] = useState(gamesWithAchievements[0]?.id ?? '')
-  const game = getGame(gameId)
+  const [gameId, setGameId] = useState(gamesWithAchievements[0]?.appId ?? "");
+  const game = getGame(gameId);
 
   const list = useMemo(
     () =>
       achievements
-        .filter((a) => a.gameId === gameId)
+        .filter((a) => a.appId === gameId)
         .sort((a, b) => b.globalPct - a.globalPct),
     [gameId],
-  )
+  );
 
   const stats = useMemo(() => {
-    const total = list.length
-    const unlocked = list.filter((a) => a.unlockedByUser)
-    const completion = total === 0 ? 0 : (unlocked.length / total) * 100
+    const total = list.length;
+    const unlocked = list.filter((a) => a.unlockedByUser);
+    const completion = total === 0 ? 0 : (unlocked.length / total) * 100;
 
     // Rarity-based standing: unlocking rarer achievements => stronger standing.
-    const globalRarity = avg(unlocked.map((a) => 100 - a.globalPct))
-    const friendsRarity = avg(unlocked.map((a) => 100 - a.friendsPct))
-    const globalTopPct = Math.max(1, Math.round(100 - globalRarity))
-    const friendsTopPct = Math.max(1, Math.round(100 - friendsRarity))
+    const globalRarity = avg(unlocked.map((a) => 100 - a.globalPct));
+    const friendsRarity = avg(unlocked.map((a) => 100 - a.friendsPct));
+    const globalTopPct = Math.max(1, Math.round(100 - globalRarity));
+    const friendsTopPct = Math.max(1, Math.round(100 - friendsRarity));
 
-    const globalAvgCompletion = avg(list.map((a) => a.globalPct))
-    const friendsAvgCompletion = avg(list.map((a) => a.friendsPct))
+    const globalAvgCompletion = avg(list.map((a) => a.globalPct));
+    const friendsAvgCompletion = avg(list.map((a) => a.friendsPct));
 
     const rarest = unlocked.reduce<Achievement | null>(
       (min, a) => (min === null || a.globalPct < min.globalPct ? a : min),
       null,
-    )
+    );
 
     return {
       total,
@@ -66,21 +68,26 @@ export function AchievementsView() {
       globalAvgCompletion,
       friendsAvgCompletion,
       rarest,
-    }
-  }, [list])
+    };
+  }, [list]);
 
   return (
     <div>
       {/* game selector */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="w-full max-w-xs">
-          <Select value={gameId} onValueChange={setGameId}>
+          <Select
+            value={gameId}
+            onValueChange={(value) => {
+              if (value !== null) setGameId(value);
+            }}
+          >
             <SelectTrigger className="bg-card">
               <SelectValue placeholder="Select a game" />
             </SelectTrigger>
             <SelectContent>
               {gamesWithAchievements.map((g) => (
-                <SelectItem key={g.id} value={g.id}>
+                <SelectItem key={g.appId} value={g.appId}>
                   {g.title}
                 </SelectItem>
               ))}
@@ -99,10 +106,20 @@ export function AchievementsView() {
           {/* Left: summary */}
           <div className="flex flex-col gap-4">
             <div className="overflow-hidden rounded-xl border border-border bg-card">
-              <GameCapsule game={game} sizes="300px" priority />
+              <GameCapsule
+                game={{
+                  appid: game.appId,
+                  appImage: game.image,
+                  title: game.title,
+                }}
+                sizes="300px"
+                priority
+              />
               <div className="p-4">
                 <h2 className="font-semibold text-foreground">{game.title}</h2>
-                <p className="text-xs text-muted-foreground">{game.developer}</p>
+                <p className="text-xs text-muted-foreground">
+                  {game.developer}
+                </p>
               </div>
             </div>
 
@@ -138,7 +155,9 @@ export function AchievementsView() {
                 <p className="text-xs font-medium uppercase tracking-wide text-primary">
                   Rarest unlock
                 </p>
-                <p className="mt-1 font-semibold text-foreground">{stats.rarest.name}</p>
+                <p className="mt-1 font-semibold text-foreground">
+                  {stats.rarest.name}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   Only {stats.rarest.globalPct}% of players have this
                 </p>
@@ -149,8 +168,14 @@ export function AchievementsView() {
           {/* Right: comparison + achievement list */}
           <div className="flex flex-col gap-6">
             <div className="rounded-xl border border-border bg-card p-5">
-              <h3 className="mb-4 font-semibold text-foreground">Completion, compared</h3>
-              <ComparisonRow label="You" value={stats.completion} tone="primary" />
+              <h3 className="mb-4 font-semibold text-foreground">
+                Completion, compared
+              </h3>
+              <ComparisonRow
+                label="You"
+                value={stats.completion}
+                tone="primary"
+              />
               <ComparisonRow
                 label="Your friends (avg)"
                 value={stats.friendsAvgCompletion}
@@ -164,23 +189,25 @@ export function AchievementsView() {
             </div>
 
             <div>
-              <h3 className="mb-3 font-semibold text-foreground">All achievements</h3>
+              <h3 className="mb-3 font-semibold text-foreground">
+                All achievements
+              </h3>
               <ul className="flex flex-col gap-2">
                 {list.map((a) => (
                   <li
                     key={a.id}
                     className={cn(
-                      'rounded-lg border border-border bg-card p-4',
-                      !a.unlockedByUser && 'opacity-80',
+                      "rounded-lg border border-border bg-card p-4",
+                      !a.unlockedByUser && "opacity-80",
                     )}
                   >
                     <div className="flex items-start gap-3">
                       <span
                         className={cn(
-                          'mt-0.5 grid size-9 shrink-0 place-items-center rounded-md',
+                          "mt-0.5 grid size-9 shrink-0 place-items-center rounded-md",
                           a.unlockedByUser
-                            ? 'bg-primary/15 text-primary'
-                            : 'bg-secondary/60 text-muted-foreground',
+                            ? "bg-primary/15 text-primary"
+                            : "bg-secondary/60 text-muted-foreground",
                         )}
                       >
                         {a.unlockedByUser ? (
@@ -191,14 +218,18 @@ export function AchievementsView() {
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="font-medium text-foreground">{a.name}</p>
+                          <p className="font-medium text-foreground">
+                            {a.name}
+                          </p>
                           {a.unlockedByUser && a.unlockedDate && (
                             <span className="shrink-0 text-xs text-muted-foreground">
                               {a.unlockedDate}
                             </span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{a.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {a.description}
+                        </p>
 
                         <div className="mt-3 grid gap-2 sm:grid-cols-2">
                           <LabeledBar
@@ -224,32 +255,37 @@ export function AchievementsView() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 const toneBg: Record<string, string> = {
-  primary: 'bg-primary',
-  ingame: 'bg-status-ingame',
-  muted: 'bg-muted-foreground',
-}
+  primary: "bg-primary",
+  ingame: "bg-status-ingame",
+  muted: "bg-muted-foreground",
+};
 
 function Bar({
   value,
   tone,
   className,
 }: {
-  value: number
-  tone: keyof typeof toneBg
-  className?: string
+  value: number;
+  tone: keyof typeof toneBg;
+  className?: string;
 }) {
   return (
-    <div className={cn('h-2 w-full overflow-hidden rounded-full bg-secondary/60', className)}>
+    <div
+      className={cn(
+        "h-2 w-full overflow-hidden rounded-full bg-secondary/60",
+        className,
+      )}
+    >
       <div
-        className={cn('h-full rounded-full', toneBg[tone])}
+        className={cn("h-full rounded-full", toneBg[tone])}
         style={{ width: `${Math.min(100, Math.max(0, value))}%` }}
       />
     </div>
-  )
+  );
 }
 
 function ComparisonRow({
@@ -257,19 +293,21 @@ function ComparisonRow({
   value,
   tone,
 }: {
-  label: string
-  value: number
-  tone: keyof typeof toneBg
+  label: string;
+  value: number;
+  tone: keyof typeof toneBg;
 }) {
   return (
     <div className="mb-4 last:mb-0">
       <div className="mb-1.5 flex items-center justify-between text-sm">
         <span className="text-foreground">{label}</span>
-        <span className="font-mono text-muted-foreground">{Math.round(value)}%</span>
+        <span className="font-mono text-muted-foreground">
+          {Math.round(value)}%
+        </span>
       </div>
       <Bar value={value} tone={tone} />
     </div>
-  )
+  );
 }
 
 function LabeledBar({
@@ -278,10 +316,10 @@ function LabeledBar({
   value,
   tone,
 }: {
-  icon: React.ReactNode
-  label: string
-  value: number
-  tone: keyof typeof toneBg
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  tone: keyof typeof toneBg;
 }) {
   return (
     <div>
@@ -294,7 +332,7 @@ function LabeledBar({
       </div>
       <Bar value={value} tone={tone} />
     </div>
-  )
+  );
 }
 
 function StandingCard({
@@ -303,10 +341,10 @@ function StandingCard({
   value,
   hint,
 }: {
-  icon: React.ReactNode
-  label: string
-  value: string
-  hint: string
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  hint: string;
 }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
@@ -317,5 +355,5 @@ function StandingCard({
       <p className="mt-1 text-xl font-bold text-foreground">{value}</p>
       <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
-  )
+  );
 }

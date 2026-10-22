@@ -102,6 +102,7 @@ const requestNews = (appid, retries) => {
         appid: appid,
         count: 10,
         maxlength: 500,
+        feeds: "steam_community_announcements",
       },
     })
     .then((res) => res.data)
