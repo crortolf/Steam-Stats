@@ -1,9 +1,7 @@
 const axios = require("axios");
 const fs = require("fs");
 
-const myApiKey = "52852E7C5F7125BC5207C73C9BFC5423";
-
-const getNews = (steamId) => {
+const getNews = (apiKey, steamId) => {
   //map going from gameid -> friend ids of those that played recently
   const friendGames = {};
   const avatars = {};
@@ -12,7 +10,7 @@ const getNews = (steamId) => {
   return axios
     .get("https://api.steampowered.com/ISteamUser/GetFriendList/v0001/", {
       params: {
-        key: myApiKey,
+        key: apiKey,
         steamid: steamId,
         relationship: "friend",
       },

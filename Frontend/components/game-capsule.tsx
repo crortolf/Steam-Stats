@@ -1,14 +1,19 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { Game } from "../lib/types";
+//TODO: add use for lastPlayed and playTime fields
 
 export function GameCapsule({
   game,
+  lastPlayed,
+  playtime,
   className,
   priority = false,
   sizes = "(max-width: 768px) 100vw, 320px",
 }: {
   game: Game;
+  lastPlayed?: string;
+  playtime?: string;
   className?: string;
   priority?: boolean;
   sizes?: string;

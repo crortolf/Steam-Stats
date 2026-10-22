@@ -1,0 +1,8 @@
+var R=require("../chunks/ssr/[turbopack]_runtime.js")("server/pages/_error.js")
+R.c("server/chunks/ssr/node_modules__pnpm_0fk4yv2._.js")
+R.c("server/chunks/ssr/[externals]__0mly4vc._.js")
+R.c("server/chunks/ssr/node_modules__pnpm_1a0anyg._.js")
+R.c("server/chunks/ssr/[externals]__1vp7etu._.js")
+R.c("server/chunks/ssr/04rc_next_1izta9x._.js")
+R.m("[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/dist/esm/build/templates/pages.js { INNER_PAGE => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/dist/pages/_error.js [ssr] (ecmascript)\", INNER_DOCUMENT => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/document.js [ssr] (ecmascript)\", INNER_APP => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/app.js [ssr] (ecmascript)\" } [ssr] (ecmascript)")
+module.exports=R.m("[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/dist/esm/build/templates/pages.js { INNER_PAGE => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/dist/pages/_error.js [ssr] (ecmascript)\", INNER_DOCUMENT => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/document.js [ssr] (ecmascript)\", INNER_APP => \"[project]/node_modules/.pnpm/next@16.3.0_@babel+core@7.2_e488ea4877697f6c405c0ecc7443a2d8/node_modules/next/app.js [ssr] (ecmascript)\" } [ssr] (ecmascript)").exports

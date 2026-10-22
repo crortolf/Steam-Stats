@@ -17,8 +17,27 @@ export type GameNews = {
 };
 
 export type Game = {
-  //id: string;
   appImage: string;
   appid: number;
   title: string;
+};
+
+export type Achievement = {
+  achieved: number;
+  time: string;
+  name: string;
+  description: string;
+};
+
+export type AchievementsData = {
+  achievements: Achievement[];
+  totalAchieved: number;
+};
+
+export type QuickGameInfo = {
+  appId: string;
+  title: string;
+  playtime: string;
+  lastPlayed: string;
+  appImage: string;
 };

@@ -42,7 +42,7 @@ export function GamesNews() {
 
     load();
     return () => controller.abort(); // cleanup
-  }, []); // empty array = run once on mount
+  }, []);
 
   useEffect(() => {
     console.log(selectedGame);
