@@ -23,8 +23,14 @@ const getAchievements = (apiKey, appId, steamId) => {
       for (const achievement of res.data.playerstats.achievements) {
         achievements.player.totalAchieved += achievement.achieved;
         achievements.player.achievements.push({
+          aId: achievement.apiname,
           achieved: achievement.achieved,
-          time: achievement.unlocktime,
+          time: new Date(achievement.unlocktime * 1000).toLocaleDateString(
+            "en-US",
+            {
+              dateStyle: "long",
+            },
+          ),
           name: achievement.name,
           description: achievement.description,
         });

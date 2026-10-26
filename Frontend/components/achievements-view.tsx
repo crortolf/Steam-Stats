@@ -17,7 +17,7 @@ import { TotalAchievePercent } from "./ui/total-achieve-percent";
 import { AchievementsPane } from "./achievements-pane";
 
 export const per = (a: AchievementsData) => {
-  return Math.round((a.totalAchieved / a.achievements.length) * 100) + "%";
+  return Math.round((a.totalAchieved / a.achievements.length) * 100);
 };
 
 export function AchievementsView() {
@@ -46,11 +46,13 @@ export function AchievementsView() {
           signal: controller.signal,
         })
         .then((res) => {
-          setGames(
-            res.data.sort((a: QuickGameInfo, b: QuickGameInfo) =>
-              a.title.localeCompare(b.title),
-            ),
-          );
+          const gamesUnformated = res.data;
+          for (const game of gamesUnformated)
+            setGames(
+              res.data.sort((a: QuickGameInfo, b: QuickGameInfo) =>
+                a.title.localeCompare(b.title),
+              ),
+            );
         })
         .catch((err) => {
           if (!axios.isCancel(err)) {

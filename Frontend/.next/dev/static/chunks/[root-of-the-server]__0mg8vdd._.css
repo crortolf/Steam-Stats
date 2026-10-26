@@ -867,10 +867,6 @@
     width: var(--anchor-width);
   }
 
-  .w-8 {
-    width: calc(var(--spacing) * 8);
-  }
-
   .w-24 {
     width: calc(var(--spacing) * 24);
   }
@@ -2565,10 +2561,6 @@
 
     .sm\:flex-row {
       flex-direction: row;
-    }
-
-    .sm\:items-center {
-      align-items: center;
     }
 
     .sm\:items-end {

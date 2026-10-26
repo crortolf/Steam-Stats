@@ -23,6 +23,7 @@ export type Game = {
 };
 
 export type Achievement = {
+  aId: string;
   achieved: number;
   time: string;
   name: string;

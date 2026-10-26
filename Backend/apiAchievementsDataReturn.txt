@@ -2,470 +2,548 @@
   "player": {
     "achievements": [
       {
+        "aId": "LILAC",
         "achieved": 1,
-        "time": 1432934295,
+        "time": "May 29, 2015",
         "name": "Lilac and Gooseberries",
         "description": ""
       },
       {
+        "aId": "FRIEND_IN_NEED",
         "achieved": 1,
-        "time": 1485312358,
+        "time": "January 24, 2017",
         "name": "A Friend in Need",
         "description": ""
       },
       {
+        "aId": "NECROMANCER",
         "achieved": 1,
-        "time": 1485417436,
+        "time": "January 26, 2017",
         "name": "Necromancer",
         "description": ""
       },
       {
+        "aId": "FAMILY_COUNSELOR",
         "achieved": 1,
-        "time": 1433700134,
+        "time": "June 7, 2015",
         "name": "Family Counselor",
         "description": ""
       },
       {
+        "aId": "SOMETHING_MORE",
         "achieved": 1,
-        "time": 1488407067,
+        "time": "March 1, 2017",
         "name": "Something More",
         "description": ""
       },
       {
+        "aId": "XENONAUT",
         "achieved": 1,
-        "time": 1488510909,
+        "time": "March 2, 2017",
         "name": "Xenonaut",
         "description": ""
       },
       {
+        "aId": "THE_KING",
         "achieved": 1,
-        "time": 1495835474,
+        "time": "May 26, 2017",
         "name": "The King is Dead",
         "description": ""
       },
       {
+        "aId": "PASSED_THE_TRIAL",
         "achieved": 1,
-        "time": 1495836828,
+        "time": "May 26, 2017",
         "name": "Passed the Trial",
         "description": "Finish the game on any difficulty."
       },
       {
+        "aId": "RAN_THE_GAUNTLET",
         "achieved": 1,
-        "time": 1495836828,
+        "time": "May 26, 2017",
         "name": "Ran the Gauntlet",
         "description": "Finish the game on the \"Blood and Broken Bones!\" or \"Death March!\" difficulty levels."
       },
       {
+        "aId": "WALKED_THE_PATH",
         "achieved": 1,
-        "time": 1495836828,
+        "time": "May 26, 2017",
         "name": "Walked the Path",
         "description": "Finish the game on the \"Death March!\" difficulty level."
       },
       {
+        "aId": "THE_PROFESSIONAL",
         "achieved": 1,
-        "time": 1495738082,
+        "time": "May 25, 2017",
         "name": "Geralt: The Professional",
         "description": ""
       },
       {
+        "aId": "MAKER",
         "achieved": 1,
-        "time": 1487277171,
+        "time": "February 16, 2017",
         "name": "Kingmaker",
         "description": ""
       },
       {
+        "aId": "ASSASSIN",
         "achieved": 1,
-        "time": 1490394654,
+        "time": "March 24, 2017",
         "name": "Assassin of Kings",
         "description": ""
       },
       {
+        "aId": "FRIENDS_WITH_BENEFITS",
         "achieved": 1,
-        "time": 1433204592,
+        "time": "June 1, 2015",
         "name": "Friends With Benefits",
         "description": ""
       },
       {
+        "aId": "FULL_CREW",
         "achieved": 1,
-        "time": 1488234612,
+        "time": "February 27, 2017",
         "name": "Full Crew",
         "description": ""
       },
       {
+        "aId": "DENDROLOGIST",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Dendrologist",
         "description": "Acquire all the Abilities in one tree."
       },
       {
+        "aId": "ENEMY_OF_MY_ENEMY",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "The Enemy of My Enemy",
         "description": "Use the Axii Sign to force one opponent to kill another. Do this 20 times."
       },
       {
+        "aId": "HUMPTY_DUMPTY",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Humpty Dumpty",
         "description": "Kill 10 opponents by knocking them off somewhere high with the Aard Sign."
       },
       {
+        "aId": "ENVIRONMENTALLY_UNFRIENDLY",
         "achieved": 1,
-        "time": 1434307739,
+        "time": "June 14, 2015",
         "name": "Environmentally Unfriendly",
         "description": "Kill 50 opponents using the environment (e.g. swamp gas, insects or objects)."
       },
       {
+        "aId": "KAER_MORHEN_TRAINED",
         "achieved": 1,
-        "time": 1485369028,
+        "time": "January 25, 2017",
         "name": "Kaer Morhen Trained",
         "description": "Perform 10 effective counterattacks in a row without getting hit or parrying."
       },
       {
+        "aId": "CANT_TOUCH_THIS",
         "achieved": 1,
-        "time": 1433702502,
+        "time": "June 7, 2015",
         "name": "Can't Touch This!",
         "description": "Kill 5 foes in a fight without taking damage (except for Toxicity) and without using the Quen Sign."
       },
       {
+        "aId": "THE_EVILEST_THING",
         "achieved": 1,
-        "time": 1485412074,
+        "time": "January 26, 2017",
         "name": "That Is the Evilest Thing",
         "description": "Ignite the gas produced by a Dragon's Dream bomb using a burning opponent. Do this 10 times."
       },
       {
+        "aId": "MUTANT",
         "achieved": 1,
-        "time": 1488407173,
+        "time": "March 1, 2017",
         "name": "Mutant",
         "description": "Fill all mutagen slots."
       },
       {
+        "aId": "BUTCHER_OF_BLAVIKEN",
         "achieved": 1,
-        "time": 1433203954,
+        "time": "June 1, 2015",
         "name": "Butcher of Blaviken",
         "description": "Kill at least 5 opponents in under 10 seconds."
       },
       {
+        "aId": "TRIPLE_THREAT",
         "achieved": 1,
-        "time": 1432757595,
+        "time": "May 27, 2015",
         "name": "Triple Threat",
         "description": ""
       },
       {
+        "aId": "BRAWLER",
         "achieved": 1,
-        "time": 1488236089,
+        "time": "February 27, 2017",
         "name": "Brawler",
         "description": "Defeat Olaf, the Skellige champion of unarmed combat."
       },
       {
+        "aId": "OVERKILL",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Overkill",
         "description": "Make an opponent suffer from bleeding, poisoning and burning simultaneously. Do this 10 times."
       },
       {
+        "aId": "MASTER_MARKSMAN",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Master Marksman",
         "description": "Kill 50 human and nonhuman opponents by striking them in the head with a crossbow bolt."
       },
       {
+        "aId": "WHAT_WAS_THAT",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "What Was That?",
         "description": ""
       },
       {
+        "aId": "EVEN_ODDS",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Even Odds",
         "description": "Kill 2 monsters you have a contract on without using Signs, potions, mutagens, oils or bombs."
       },
       {
+        "aId": "GLOBETROTTER",
         "achieved": 1,
-        "time": 1469143108,
+        "time": "July 21, 2016",
         "name": "Globetrotter",
         "description": "Discover 100 fast travel points."
       },
       {
+        "aId": "PEST_CONTROL",
         "achieved": 1,
-        "time": 1487279587,
+        "time": "February 16, 2017",
         "name": "Pest Control",
         "description": "Destroy all monster nests in the Velen / Novigrad region, or in Skellige."
       },
       {
+        "aId": "CARD_COLLECTOR",
         "achieved": 1,
-        "time": 1488234357,
+        "time": "February 27, 2017",
         "name": "Card Collector",
         "description": "Acquire all gwent cards available in the base version of the game."
       },
       {
+        "aId": "GWENT_MASTER",
         "achieved": 1,
-        "time": 1485369322,
+        "time": "January 25, 2017",
         "name": "Gwent Master",
         "description": "Defeat Tybalt and win the gwent tournament held at the Passiflora."
       },
       {
+        "aId": "LETS_COOK",
         "achieved": 1,
-        "time": 1432845977,
+        "time": "May 28, 2015",
         "name": "Let's Cook!",
         "description": "Learn 12 potion formulae."
       },
       {
+        "aId": "BOMBARDIER",
         "achieved": 1,
-        "time": 1433054836,
+        "time": "May 31, 2015",
         "name": "Bombardier",
         "description": "Collect the formulae for 6 different bomb types."
       },
       {
+        "aId": "BOOKWORM",
         "achieved": 1,
-        "time": 1433808485,
+        "time": "June 8, 2015",
         "name": "Bookworm",
         "description": "Read 30 books, journals or other documents."
       },
       {
+        "aId": "ARMED_AND_DANGEROUS",
         "achieved": 1,
-        "time": 1434844720,
+        "time": "June 20, 2015",
         "name": "Armed and Dangerous",
         "description": "Find and equip all the elements of one set of witcher gear."
       },
       {
+        "aId": "POWER_OVERWHELMING",
         "achieved": 1,
-        "time": 1790772769,
+        "time": "September 30, 2026",
         "name": "Power Overwhelming",
         "description": "Have all possible Place of Power bonuses active at the same time."
       },
       {
+        "aId": "BRAWL_MASTER",
         "achieved": 1,
-        "time": 1488404813,
+        "time": "March 1, 2017",
         "name": "Brawl Master",
         "description": "Complete all fistfighting quests in Velen, Skellige and Novigrad."
       },
       {
+        "aId": "FAST_AND_FURIOUS",
         "achieved": 1,
-        "time": 1488235449,
+        "time": "February 27, 2017",
         "name": "Fast and Furious",
         "description": "Win all the horse races in the game."
       },
       {
+        "aId": "MUNCHKIN",
         "achieved": 1,
-        "time": 1495836025,
+        "time": "May 26, 2017",
         "name": "Munchkin",
         "description": "Reach character development level 35."
       },
       {
+        "aId": "FIRE_IN_THE_HOLE",
         "achieved": 1,
-        "time": 1434248624,
+        "time": "June 13, 2015",
         "name": "Fire in the Hole",
         "description": "Destroy 10 monster nests using bombs."
       },
       {
+        "aId": "FIST_OF_THE_SOUTH_STAR",
         "achieved": 1,
-        "time": 1434155291,
+        "time": "June 12, 2015",
         "name": "Fist of the South Star",
         "description": "Defeat an opponent in a fistfight without taking any damage."
       },
       {
+        "aId": "GERALT_AND_FRIENDS",
         "achieved": 1,
-        "time": 1497468421,
+        "time": "June 14, 2017",
         "name": "Geralt and Friends",
         "description": "Win a round of gwent using only neutral cards."
       },
       {
+        "aId": "ALL_IN",
         "achieved": 1,
-        "time": 1468555918,
+        "time": "July 15, 2016",
         "name": "All In",
         "description": "Play three hero cards in one round of gwent and win the match."
       },
       {
+        "aId": "SHRIEKER",
         "achieved": 1,
-        "time": 1433807800,
+        "time": "June 8, 2015",
         "name": "Shrieker",
         "description": "Complete the contract on the shrieker."
       },
       {
+        "aId": "FEARLESS_VAMPIRE_SLAYER",
         "achieved": 1,
-        "time": 1485901739,
+        "time": "January 31, 2017",
         "name": "Fearless Vampire Slayer",
         "description": "Complete the contract on Sarasti."
       },
       {
+        "aId": "WOODLAND_SPIRIT",
         "achieved": 1,
-        "time": 1469081040,
+        "time": "July 21, 2016",
         "name": "Woodland Spirit",
         "description": "Complete the contract on the Woodland Spirit."
       },
       {
+        "aId": "FIEND_OR_FOE",
         "achieved": 1,
-        "time": 1488405244,
+        "time": "March 1, 2017",
         "name": "Fiend or Foe?",
         "description": "Complete the contract on Morvudd."
       },
       {
+        "aId": "ASHES_TO_ASHES",
         "achieved": 1,
-        "time": 1486426273,
+        "time": "February 6, 2017",
         "name": "Ashes to Ashes",
         "description": "Complete the contract on Therazane."
       },
       {
+        "aId": "THE_DOPPLER_EFFECT",
         "achieved": 1,
-        "time": 1468566380,
+        "time": "July 15, 2016",
         "name": "The Doppler Effect",
         "description": "Resolve the doppler problem in Novigrad."
       },
       {
+        "aId": "EP1_1",
         "achieved": 1,
-        "time": 1496956795,
+        "time": "June 8, 2017",
         "name": "I'm Not Kissing That",
         "description": ""
       },
       {
+        "aId": "EP1_2",
         "achieved": 1,
-        "time": 1497463499,
+        "time": "June 14, 2017",
         "name": "Let the Good Times Roll!",
         "description": ""
       },
       {
+        "aId": "EP1_3",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Shopaholic",
         "description": ""
       },
       {
+        "aId": "EP1_4",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Curator of Nightmares",
         "description": ""
       },
       {
+        "aId": "EP1_5",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Pacta Sunt Servanda",
         "description": ""
       },
       {
+        "aId": "EP1_6",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "When It's Many Against One…",
         "description": ""
       },
       {
+        "aId": "EP1_7",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Return to Sender",
         "description": "Kill 3 opponents with their own arrows."
       },
       {
+        "aId": "EP1_8",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Can Quit Anytime I Want",
         "description": "Be under the influence of seven potions or decoctions at the same time."
       },
       {
+        "aId": "EP1_9",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Wild Rose Dethorned",
         "description": ""
       },
       {
+        "aId": "EP1_10",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "I Wore Ofieri Before It Was Cool",
         "description": "Collect all available Ofieri armor and horse gear, and at least one Ofieri sword."
       },
       {
+        "aId": "EP1_11",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Moo-rderer",
         "description": ""
       },
       {
+        "aId": "EP1_12",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Rad Steez, Bro!",
         "description": ""
       },
       {
+        "aId": "EP1_13",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Killed It",
         "description": "Win a round of gwent with a total strength of at least 187."
       },
       {
+        "aId": "EP2_1",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "The Witcher's Gone South",
         "description": "Travel to the Duchy of Toussaint."
       },
       {
+        "aId": "EP2_2",
         "achieved": 1,
-        "time": 1510347188,
+        "time": "November 10, 2017",
         "name": "Last Action Hero",
         "description": "Be decorated with the Order of Vitis Vinifera."
       },
       {
+        "aId": "EP2_3",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Kling of the Clink",
         "description": "Serve time in Toussaint."
       },
       {
+        "aId": "EP2_4",
         "achieved": 1,
-        "time": 1498275181,
+        "time": "June 23, 2017",
         "name": "A Knight to Remember",
         "description": "Obtain a flawless victory in all the competitions during the knights' tourney."
       },
       {
+        "aId": "EP2_5",
         "achieved": 1,
-        "time": 1509933364,
+        "time": "November 5, 2017",
         "name": "Embodiment of the Five Virtues",
         "description": "Be given Aerondight by the Lady of the Lake."
       },
       {
+        "aId": "EP2_6",
         "achieved": 1,
-        "time": 1503784766,
+        "time": "August 26, 2017",
         "name": "Playing House",
         "description": "Use all available options for developing Corvo Bianco."
       },
       {
+        "aId": "EP2_7",
         "achieved": 1,
-        "time": 1510000505,
+        "time": "November 6, 2017",
         "name": "Turned Every Stone",
         "description": "Find all grandmaster diagrams for each witcher school."
       },
       {
+        "aId": "EP2_8",
         "achieved": 1,
-        "time": 1501460002,
+        "time": "July 30, 2017",
         "name": "I Have a Gwent Problem",
         "description": "Collect all the cards in the Skellige deck."
       },
       {
+        "aId": "EP2_9",
         "achieved": 1,
-        "time": 1503782782,
+        "time": "August 26, 2017",
         "name": "The Grapes of Wrath Stomped",
         "description": ""
       },
       {
+        "aId": "EP2_10",
         "achieved": 1,
-        "time": 1500573445,
+        "time": "July 20, 2017",
         "name": "Dressed to Kill",
         "description": "Unlock the bonus for equipping all the witcher gear elements from one School."
       },
       {
+        "aId": "EP2_11",
         "achieved": 1,
-        "time": 1504062132,
+        "time": "August 29, 2017",
         "name": "Weapon \"W\"",
         "description": "Develop a mutation."
       },
       {
+        "aId": "EP2_12",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "Hasta la Vista™",
         "description": ""
       },
       {
+        "aId": "EP2_13",
         "achieved": 0,
-        "time": 0,
+        "time": "December 31, 1969",
         "name": "David and Golyat",
         "description": ""
       }

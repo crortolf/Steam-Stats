@@ -1,4 +1,4 @@
-import { AchievementsData, QuickGameInfo } from "@/lib/types";
+import { AchievementsData, QuickGameInfo, Achievement } from "@/lib/types";
 import { GameCapsule } from "./game-capsule";
 import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
 import { per } from "./achievements-view";
@@ -13,7 +13,7 @@ export function AchievementsPane({
 }) {
   return (
     <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-      Left: summary
+      {/* Left: summary */}
       <div className="flex flex-col gap-4">
         <div className="overflow-hidden rounded-xl border border-border bg-card">
           <GameCapsule
@@ -36,7 +36,7 @@ export function AchievementsPane({
                 </p> */}
           </div>
         </div>
-        completion ring-ish
+        {/* completion ring-ish */}
         <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Trophy className="size-4 text-primary" /> Your completion
@@ -48,7 +48,7 @@ export function AchievementsPane({
           {/* <Bar value={per(achievementsData} tone="primary" className="mt-3" /> */}
         </div>
         <div className="grid grid-cols-2 gap-4">
-          Global standing and among friends area
+          {/* Global standing and among friends area */}
           {/* <StandingCard
                 icon={<Globe className="size-4" />}
                 label="Global standing"
@@ -75,9 +75,9 @@ export function AchievementsPane({
                 </p>
               </div>
             )} */}
-        rarest achieve
+        {/* rarest achieve */}
       </div>
-      Right: comparison + achievement list
+      {/* Right: comparison + achievement list */}
       <div className="flex flex-col gap-6">
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 font-semibold text-foreground">
@@ -85,10 +85,7 @@ export function AchievementsPane({
           </h3>
           <ComparisonRow
             label="You"
-            value={
-              achievementsData.totalAchieved /
-              achievementsData.achievements.length
-            }
+            value={per(achievementsData)}
             tone="primary"
           />
           {/* <ComparisonRow
@@ -107,64 +104,64 @@ export function AchievementsPane({
           <h3 className="mb-3 font-semibold text-foreground">
             All achievements
           </h3>
-          {/* <ul className="flex flex-col gap-2">
-                {list.map((a) => (
-                  <li
-                    key={a.id}
-                    className={cn(
-                      "rounded-lg border border-border bg-card p-4",
-                      !a.unlockedByUser && "opacity-80",
-                    )}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span
-                        className={cn(
-                          "mt-0.5 grid size-9 shrink-0 place-items-center rounded-md",
-                          a.unlockedByUser
-                            ? "bg-primary/15 text-primary"
-                            : "bg-secondary/60 text-muted-foreground",
+          <ul className="flex flex-col gap-2">
+            {achievementsData.achievements
+              .sort((a: Achievement, b: Achievement) => b.achieved - a.achieved)
+              .map((a) => (
+                <li
+                  key={a.aId}
+                  className={cn(
+                    "rounded-lg border border-border bg-card p-4",
+                    !a.achieved && "opacity-80",
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={cn(
+                        "mt-0.5 grid size-9 shrink-0 place-items-center rounded-md",
+                        a.achieved
+                          ? "bg-primary/15 text-primary"
+                          : "bg-secondary/60 text-muted-foreground",
+                      )}
+                    >
+                      {a.achieved ? (
+                        <Check className="size-5" />
+                      ) : (
+                        <Lock className="size-4" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium text-foreground">{a.name}</p>
+                        {a.achieved === 1 && a.time && (
+                          <span className="shrink-0 text-xs text-muted-foreground">
+                            {a.time}
+                          </span>
                         )}
-                      >
-                        {a.unlockedByUser ? (
-                          <Check className="size-5" />
-                        ) : (
-                          <Lock className="size-4" />
-                        )}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-medium text-foreground">
-                            {a.name}
-                          </p>
-                          {a.unlockedByUser && a.unlockedDate && (
-                            <span className="shrink-0 text-xs text-muted-foreground">
-                              {a.unlockedDate}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          {a.description}
-                        </p>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {a.description}
+                      </p>
 
-                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                          <LabeledBar
-                            icon={<Globe className="size-3" />}
-                            label="Global"
-                            value={a.globalPct}
-                            tone="muted"
-                          />
-                          <LabeledBar
-                            icon={<Users className="size-3" />}
-                            label="Friends"
-                            value={a.friendsPct}
-                            tone="ingame"
-                          />
-                        </div>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                        <LabeledBar
+                          icon={<Globe className="size-3" />}
+                          label="Global"
+                          value={a.globalPct}
+                          tone="muted"
+                        />
+                        <LabeledBar
+                          icon={<Users className="size-3" />}
+                          label="Friends"
+                          value={a.friendsPct}
+                          tone="ingame"
+                        />
                       </div>
                     </div>
-                  </li>
-                ))}
-              </ul> */}
+                  </div>
+                </li>
+              ))}
+          </ul>
         </div>
       </div>
     </div>
