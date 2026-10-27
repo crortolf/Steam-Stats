@@ -1,10 +1,53 @@
 const axios = require("axios");
 const fs = require("fs");
+const mc = require("mongodb");
 
+const mongo = new mc.MongoClient("mongodb://localhost:27017", {
+  serverApi: {
+    version: mc.ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+}).db("Steam-Stats");
+
+//tries mongo first, then gets data from steam api
 const getAchievements = (apiKey, appId, steamId) => {
+  const pwg = mongo.collection("PlayerWithGame");
+
+  return pwg.findOne({ steamId: steamId, appId: appId }).then((record) => {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    if (record === null || record.updatedAt < yesterday) {
+      return retrieveAchievements(apiKey, appId, steamId).then((resAch) => {
+        pwg.updateOne(
+          { steamId: steamId, appId: appId },
+          {
+            $setOnInsert: {
+              steamId: steamId,
+              appId: appId,
+            },
+            $set: {
+              achievements: resAch.achievements,
+              totalAchieved: resAch.totalAchieved,
+              updatedAt: new Date(),
+            },
+          },
+          { upsert: true },
+        );
+        return resAch;
+      });
+    } else {
+      return {
+        achievements: record.achievements,
+        totalAchieved: record.totalAchieved,
+      };
+    }
+  });
+};
+
+const retrieveAchievements = (apiKey, appId, steamId) => {
   const achievements = {};
 
-  const playerRequest = axios
+  return axios
     .get(
       "https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/",
       {
@@ -17,12 +60,11 @@ const getAchievements = (apiKey, appId, steamId) => {
       },
     )
     .then((res) => {
-      achievements.player = {};
-      achievements.player.achievements = [];
-      achievements.player.totalAchieved = 0;
+      achievements.achievements = [];
+      achievements.totalAchieved = 0;
       for (const achievement of res.data.playerstats.achievements) {
-        achievements.player.totalAchieved += achievement.achieved;
-        achievements.player.achievements.push({
+        achievements.totalAchieved += achievement.achieved;
+        achievements.achievements.push({
           aId: achievement.apiname,
           achieved: achievement.achieved,
           time: new Date(achievement.unlocktime * 1000).toLocaleDateString(
@@ -35,9 +77,8 @@ const getAchievements = (apiKey, appId, steamId) => {
           description: achievement.description,
         });
       }
-    });
-
-  return Promise.all([playerRequest]).then((res) => achievements);
+    })
+    .then(() => achievements);
 };
 
 const getGames = (apiKey, steamId) => {
