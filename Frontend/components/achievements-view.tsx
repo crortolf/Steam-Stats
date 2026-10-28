@@ -21,10 +21,11 @@ export const per = (a: AchievementsData) => {
 };
 
 export function AchievementsView() {
-  const [selectedGame, setSelectedGame] = useState<QuickGameInfo | null>(null);
-  const [games, setGames] = useState<QuickGameInfo[] | null>(null);
-  const [achievementsData, setAchievementsData] =
+  const [selectedGame, setSelectedGame] = useState<string[] | null>(null);
+  const [games, setGames] = useState<string[][] | null>(null);
+  const [playerAchievementsData, setPlayerAchievementsData] =
     useState<AchievementsData | null>(null);
+  const [globalAchievementsData, setGlobalAchievementsData] = useState(null);
   const [gamesLoading, setGamesLoading] = useState(true);
   const [gamesError, setGamesError] = useState<string | null>(null);
   const [achievementsLoading, setAchievementsLoading] = useState(true);
@@ -38,25 +39,24 @@ export function AchievementsView() {
     //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
     function load() {
       axios
-        .get("http://localhost:5011/achievements/getGames/", {
+        .get("http://localhost:5011/achievements/getIdsTitles/", {
           params: {
-            apiKey: process.env.REACT_APP_API_KEY,
-            steamId: 76561198045843433,
+            key: process.env.NEXT_PUBLIC_API_KEY,
+            id: process.env.NEXT_PUBLIC_CF_ID,
           },
           signal: controller.signal,
         })
         .then((res) => {
-          const gamesUnformated = res.data;
-          for (const game of gamesUnformated)
-            setGames(
-              res.data.sort((a: QuickGameInfo, b: QuickGameInfo) =>
-                a.title.localeCompare(b.title),
-              ),
-            );
+          setGames(
+            res.data.sort((a: string[], b: string[]) =>
+              a[1].localeCompare(b[1]),
+            ),
+          );
         })
         .catch((err) => {
+          console.log(err);
           if (!axios.isCancel(err)) {
-            setGamesError("Failed to load achievements");
+            setGamesError("Failed to load games");
           }
         })
         .finally(() => {
@@ -76,27 +76,40 @@ export function AchievementsView() {
 
     //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
     function load() {
+      console.log(selectedGame ? selectedGame[0] : undefined);
       axios
-        .get<{ player: AchievementsData }>(
-          "http://localhost:5011/achievements/getAchievements/",
-          {
-            params: {
-              apiKey: process.env.REACT_APP_API_KEY,
-              appId: selectedGame?.appId,
-              steamId: 76561198045843433,
-            },
-            signal: controller.signal,
+        .get("http://localhost:5011/achievements/getAchievements/", {
+          params: {
+            apiKey: process.env.NEXT_PUBLIC_API_KEY,
+            appId: selectedGame ? selectedGame[0] : undefined,
+            steamId: process.env.NEXT_PUBLIC_CF_ID,
           },
-        )
-        .then((res) => setAchievementsData(res.data.player))
+          signal: controller.signal,
+        })
+        .then((res) => {
+          setPlayerAchievementsData(res.data);
+          axios
+            .get(
+              "http://localhost:5011/achievements/getGameAchievementsInfo/",
+              {
+                params: {
+                  key: process.env.NEXT_PUBLIC_API_KEY,
+                  id: selectedGame ? selectedGame[0] : undefined,
+                },
+              },
+            )
+            .then((response) => {
+              setGlobalAchievementsData(response.data);
+            })
+            .finally(() => {
+              setAchievementsLoading(false);
+              console.log("Achieves loaded");
+            });
+        })
         .catch((err) => {
           if (!axios.isCancel(err)) {
             setAchievementsError("Failed to load achievements");
           }
-        })
-        .finally(() => {
-          setAchievementsLoading(false);
-          console.log("Achieves loaded");
         });
     }
 
@@ -138,7 +151,9 @@ export function AchievementsView() {
   console.log("Games are:");
   console.log(games);
   console.log("Achieves are:");
-  console.log(achievementsData);
+  console.log(playerAchievementsData);
+  console.log("Global Data is:");
+  console.log(globalAchievementsData);
 
   if (gamesLoading) return <div>Loading...</div>;
   if (achievementsError) return <div>Achievements error encountered</div>;
@@ -148,10 +163,14 @@ export function AchievementsView() {
     <div>
       {/*  game selector */}
       <Select
-        value={selectedGame?.title}
+        value={selectedGame?.[1]}
         onValueChange={(title) => {
-          setSelectedGame(games?.find((game) => game.title === title) ?? null);
-          console.log(games?.find((game) => game.title === title) ?? null);
+          const newSelectedGame =
+            games?.find((game) => game[1] === title) ?? null;
+          if (newSelectedGame !== null) {
+            setAchievementsLoading(true);
+            setSelectedGame(newSelectedGame);
+          }
         }}
       >
         <SelectTrigger className="bg-card">
@@ -159,16 +178,17 @@ export function AchievementsView() {
         </SelectTrigger>
         <SelectContent>
           {games?.map((game) => (
-            <SelectItem key={game.title} value={game.title}>
-              {game.title}
+            <SelectItem key={game[0]} value={game[1]}>
+              {game[1]}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      {achievementsData && selectedGame && (
+      {!achievementsLoading && playerAchievementsData && selectedGame && (
         <AchievementsPane
-          achievementsData={achievementsData}
+          achievementsData={playerAchievementsData}
           selectedGame={selectedGame}
+          globalGameStatistics={globalAchievementsData}
         />
       )}
     </div>

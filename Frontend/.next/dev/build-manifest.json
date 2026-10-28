@@ -1,6 +1,30 @@
 {
   "pages": {
-    "/_app": []
+    "/_app": [
+      "static/chunks/04rc_next_dist_compiled_19yqkv8._.js",
+      "static/chunks/04rc_next_dist_shared_lib_1nfl6n-._.js",
+      "static/chunks/04rc_next_dist_client_1h5zr8z._.js",
+      "static/chunks/04rc_next_dist_1g8xm4o._.js",
+      "static/chunks/04rc_next_app_0mt368-.js",
+      "static/chunks/[next]_entry_page-loader_ts_0h5ep06._.js",
+      "static/chunks/162a_react-dom_1hsf_h5._.js",
+      "static/chunks/node_modules__pnpm_20tl2_t._.js",
+      "static/chunks/[root-of-the-server]__0l4r13l._.js",
+      "static/chunks/pages__app_0du2_q-._.js",
+      "static/chunks/turbopack-pages__app_0ub_d5m._.js"
+    ],
+    "/_error": [
+      "static/chunks/04rc_next_dist_compiled_19yqkv8._.js",
+      "static/chunks/04rc_next_dist_shared_lib_03y29dm._.js",
+      "static/chunks/04rc_next_dist_client_1h5zr8z._.js",
+      "static/chunks/04rc_next_dist_0tag1n8._.js",
+      "static/chunks/[next]_entry_page-loader_ts_1l1ekiq._.js",
+      "static/chunks/162a_react-dom_1hsf_h5._.js",
+      "static/chunks/node_modules__pnpm_20tl2_t._.js",
+      "static/chunks/[root-of-the-server]__02sxxph._.js",
+      "static/chunks/pages__error_0du2_q-._.js",
+      "static/chunks/turbopack-pages__error_0um2w4v._.js"
+    ]
   },
   "devFiles": [],
   "polyfillFiles": [
@@ -24,19 +48,6 @@
     "static/chunks/turbopack-_1hm3kf-._.js"
   ],
   "rootMainFilesTree": {
-    "/page": [
-      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_05iiem-._.js",
-      "static/chunks/04rc_next_dist_compiled_next-devtools_index_1s0o2e1.js",
-      "static/chunks/04rc_next_dist_compiled_react-dom_0naxclq._.js",
-      "static/chunks/04rc_next_dist_compiled_react-server-dom-turbopack_08k27r4._.js",
-      "static/chunks/04rc_next_dist_compiled_1d34m8o._.js",
-      "static/chunks/04rc_next_dist_client_0qgwigj._.js",
-      "static/chunks/04rc_next_dist_0hdrptt._.js",
-      "static/chunks/0vvp_@swc_helpers_cjs_0vb02wp._.js",
-      "static/chunks/_1anvha4._.js",
-      "static/chunks/turbopack-_1hm3kf-._.js",
-      "static/chunks/_219uq1s._.js"
-    ],
     "/achievements/page": [
       "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_05iiem-._.js",
       "static/chunks/04rc_next_dist_compiled_next-devtools_index_1s0o2e1.js",
@@ -49,6 +60,32 @@
       "static/chunks/_1anvha4._.js",
       "static/chunks/turbopack-_1hm3kf-._.js",
       "static/chunks/_0c3i7py._.js"
+    ],
+    "/games/page": [
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_05iiem-._.js",
+      "static/chunks/04rc_next_dist_compiled_next-devtools_index_1s0o2e1.js",
+      "static/chunks/04rc_next_dist_compiled_react-dom_0naxclq._.js",
+      "static/chunks/04rc_next_dist_compiled_react-server-dom-turbopack_08k27r4._.js",
+      "static/chunks/04rc_next_dist_compiled_1d34m8o._.js",
+      "static/chunks/04rc_next_dist_client_0qgwigj._.js",
+      "static/chunks/04rc_next_dist_0hdrptt._.js",
+      "static/chunks/0vvp_@swc_helpers_cjs_0vb02wp._.js",
+      "static/chunks/_1anvha4._.js",
+      "static/chunks/turbopack-_1hm3kf-._.js",
+      "static/chunks/_1itl1nf._.js"
+    ],
+    "/network/page": [
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_05iiem-._.js",
+      "static/chunks/04rc_next_dist_compiled_next-devtools_index_1s0o2e1.js",
+      "static/chunks/04rc_next_dist_compiled_react-dom_0naxclq._.js",
+      "static/chunks/04rc_next_dist_compiled_react-server-dom-turbopack_08k27r4._.js",
+      "static/chunks/04rc_next_dist_compiled_1d34m8o._.js",
+      "static/chunks/04rc_next_dist_client_0qgwigj._.js",
+      "static/chunks/04rc_next_dist_0hdrptt._.js",
+      "static/chunks/0vvp_@swc_helpers_cjs_0vb02wp._.js",
+      "static/chunks/_1anvha4._.js",
+      "static/chunks/turbopack-_1hm3kf-._.js",
+      "static/chunks/_03j8vgc._.js"
     ]
   },
   "pagesChunkGroupBootstrapParams": {},

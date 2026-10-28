@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
-const { getGameInfo } = require("../services/getGames");
+const { getGamesInfo, getOwnedGames } = require("../services/getGames");
+const { getPlayersInfo } = require("../services/getPlayers");
 const { getAchievements } = require("../controllers/achievementsController");
 
 router.get("/getAchievements", (req, response) => {
@@ -10,20 +11,18 @@ router.get("/getAchievements", (req, response) => {
   );
 });
 
-router.get("/getGames", (req, response) => {
-  // getGames(req.query.apiKey, req.query.steamId).then((result) => {
-  //   fs.writeFileSync(
-  //     "apiOwnedGamesDataReturn.txt",
-  //     JSON.stringify(result, null, 2),
-  //   );
-  //   response.json(result);
-  // });
-  response.json(JSON.parse(fs.readFileSync("apiOwnedGamesDataReturn.txt")));
+router.get("/getIdsTitles", (req, response) => {
+  getOwnedGames(req.query.key, req.query.id).then((result) => {
+    const idsTitles = result.games.map(({ id, title }) => {
+      return [id, title];
+    });
+    response.json(idsTitles);
+  });
 });
 
-router.get("/temp", (req, response) => {
-  getGameInfo(req.query.apiKey, req.query.ids.split(",")).then((result) =>
-    response.json(result),
+router.get("/getGameAchievementsInfo", (req, response) => {
+  getGamesInfo(req.query.key, [req.query.id]).then((result) =>
+    response.json(result[0]),
   );
 });
 

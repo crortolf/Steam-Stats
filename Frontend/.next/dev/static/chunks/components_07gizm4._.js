@@ -20,13 +20,14 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 const per = (a)=>{
-    return Math.round(a.totalAchieved / a.achievements.length * 100) + "%";
+    return Math.round(a.totalAchieved / a.achievements.length * 100);
 };
 function AchievementsView() {
     _s();
     const [selectedGame, setSelectedGame] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [games, setGames] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
-    const [achievementsData, setAchievementsData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [playerAchievementsData, setPlayerAchievementsData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    const [globalAchievementsData, setGlobalAchievementsData] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [gamesLoading, setGamesLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [gamesError, setGamesError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     const [achievementsLoading, setAchievementsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
@@ -36,20 +37,23 @@ function AchievementsView() {
             const controller = new AbortController();
             //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
             function load() {
-                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$axios$40$1$2e$19$2e$0_debug$40$4$2e$4$2e$3$2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("http://localhost:5011/achievements/getGames/", {
+                __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$axios$40$1$2e$19$2e$0_debug$40$4$2e$4$2e$3$2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("http://localhost:5011/achievements/getIdsTitles/", {
                     params: {
-                        apiKey: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].env.REACT_APP_API_KEY,
-                        steamId: 76561198045843433
+                        key: ("TURBOPACK compile-time value", "52852E7C5F7125BC5207C73C9BFC5423"),
+                        id: ("TURBOPACK compile-time value", "76561198045843433")
                     },
                     signal: controller.signal
                 }).then({
-                    "AchievementsView.useEffect.load": (res)=>setGames(res.data.sort({
-                            "AchievementsView.useEffect.load": (a, b)=>a.title.localeCompare(b.title)
-                        }["AchievementsView.useEffect.load"]))
+                    "AchievementsView.useEffect.load": (res)=>{
+                        setGames(res.data.sort({
+                            "AchievementsView.useEffect.load": (a, b)=>a[1].localeCompare(b[1])
+                        }["AchievementsView.useEffect.load"]));
+                    }
                 }["AchievementsView.useEffect.load"]).catch({
                     "AchievementsView.useEffect.load": (err)=>{
+                        console.log(err);
                         if (!__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$axios$40$1$2e$19$2e$0_debug$40$4$2e$4$2e$3$2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].isCancel(err)) {
-                            setGamesError("Failed to load achievements");
+                            setGamesError("Failed to load games");
                         }
                     }
                 }["AchievementsView.useEffect.load"]).finally({
@@ -71,15 +75,28 @@ function AchievementsView() {
             const controller = new AbortController();
             //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
             function load() {
+                console.log(selectedGame ? selectedGame[0] : undefined);
                 __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$axios$40$1$2e$19$2e$0_debug$40$4$2e$4$2e$3$2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("http://localhost:5011/achievements/getAchievements/", {
                     params: {
-                        apiKey: __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].env.REACT_APP_API_KEY,
-                        appId: selectedGame?.appId,
-                        steamId: 76561198045843433
+                        apiKey: ("TURBOPACK compile-time value", "52852E7C5F7125BC5207C73C9BFC5423"),
+                        appId: selectedGame ? selectedGame[0] : undefined,
+                        steamId: ("TURBOPACK compile-time value", "76561198045843433")
                     },
                     signal: controller.signal
                 }).then({
-                    "AchievementsView.useEffect.load": (res)=>setAchievementsData(res.data.player)
+                    "AchievementsView.useEffect.load": (res)=>{
+                        setPlayerAchievementsData(res.data);
+                        __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$axios$40$1$2e$19$2e$0_debug$40$4$2e$4$2e$3$2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].get("http://localhost:5011/achievements/getGameAchievementsInfo/", {
+                            params: {
+                                key: ("TURBOPACK compile-time value", "52852E7C5F7125BC5207C73C9BFC5423"),
+                                id: selectedGame ? selectedGame[0] : undefined
+                            }
+                        }).then({
+                            "AchievementsView.useEffect.load": (response)=>{
+                                setGlobalAchievementsData(response.data);
+                            }
+                        }["AchievementsView.useEffect.load"]);
+                    }
                 }["AchievementsView.useEffect.load"]).catch({
                     "AchievementsView.useEffect.load": (err)=>{
                         if (!__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$axios$40$1$2e$19$2e$0_debug$40$4$2e$4$2e$3$2f$node_modules$2f$axios$2f$lib$2f$axios$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].isCancel(err)) {
@@ -130,87 +147,79 @@ function AchievementsView() {
     console.log("Games are:");
     console.log(games);
     console.log("Achieves are:");
-    console.log(achievementsData);
+    console.log(playerAchievementsData);
+    console.log("Global Data is:");
+    console.log(globalAchievementsData);
     if (gamesLoading) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         children: "Loading..."
     }, void 0, false, {
         fileName: "[project]/components/achievements-view.tsx",
-        lineNumber: 141,
+        lineNumber: 158,
         columnNumber: 28
     }, this);
     if (achievementsError) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         children: "Achievements error encountered"
     }, void 0, false, {
         fileName: "[project]/components/achievements-view.tsx",
-        lineNumber: 142,
+        lineNumber: 159,
         columnNumber: 33
     }, this);
     if (gamesError) return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         children: "Games error encountered"
     }, void 0, false, {
         fileName: "[project]/components/achievements-view.tsx",
-        lineNumber: 143,
+        lineNumber: 160,
         columnNumber: 26
     }, this);
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-        children: [
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
-                value: selectedGame?.title,
-                onValueChange: (title)=>{
-                    setSelectedGame(games?.find((game)=>game.title === title) ?? null);
-                    console.log(games?.find((game)=>game.title === title) ?? null);
-                },
-                children: [
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectTrigger"], {
-                        className: "bg-card",
-                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectValue"], {
-                            placeholder: "Select a game"
-                        }, void 0, false, {
-                            fileName: "[project]/components/achievements-view.tsx",
-                            lineNumber: 156,
-                            columnNumber: 11
-                        }, this)
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
+            value: selectedGame?.[1],
+            onValueChange: (title)=>{
+                setSelectedGame(games?.find((game)=>game[1] === title) ?? null);
+                console.log(games?.find((game)=>game[1] === title) ?? null);
+            },
+            children: [
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectTrigger"], {
+                    className: "bg-card",
+                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectValue"], {
+                        placeholder: "Select a game"
                     }, void 0, false, {
                         fileName: "[project]/components/achievements-view.tsx",
-                        lineNumber: 155,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
-                        children: games?.map((game)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
-                                value: game.title,
-                                children: game.title
-                            }, game.title, false, {
-                                fileName: "[project]/components/achievements-view.tsx",
-                                lineNumber: 160,
-                                columnNumber: 13
-                            }, this))
-                    }, void 0, false, {
-                        fileName: "[project]/components/achievements-view.tsx",
-                        lineNumber: 158,
-                        columnNumber: 9
+                        lineNumber: 173,
+                        columnNumber: 11
                     }, this)
-                ]
-            }, void 0, true, {
-                fileName: "[project]/components/achievements-view.tsx",
-                lineNumber: 148,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(AchievementsPane, {
-                achievementsData: achievementsData,
-                selectedGame: selectedGame
-            }, void 0, false, {
-                fileName: "[project]/components/achievements-view.tsx",
-                lineNumber: 166,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
+                }, void 0, false, {
+                    fileName: "[project]/components/achievements-view.tsx",
+                    lineNumber: 172,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
+                    children: games?.map((game)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f2e$pnpm$2f$next$40$16$2e$3$2e$0_$40$babel$2b$core$40$7$2e$2_e488ea4877697f6c405c0ecc7443a2d8$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
+                            value: game[1],
+                            children: game[1]
+                        }, game[0], false, {
+                            fileName: "[project]/components/achievements-view.tsx",
+                            lineNumber: 177,
+                            columnNumber: 13
+                        }, this))
+                }, void 0, false, {
+                    fileName: "[project]/components/achievements-view.tsx",
+                    lineNumber: 175,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "[project]/components/achievements-view.tsx",
+            lineNumber: 165,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
         fileName: "[project]/components/achievements-view.tsx",
-        lineNumber: 146,
+        lineNumber: 163,
         columnNumber: 5
     }, this);
 }
-_s(AchievementsView, "Yhfx9kMd9k+HgmxI+Y1ePfbUG7c=");
+_s(AchievementsView, "xkfixwMWX9mlkXjK6vBsrrVmhAA=");
 _c = AchievementsView;
 var _c;
 __turbopack_context__.k.register(_c, "AchievementsView");

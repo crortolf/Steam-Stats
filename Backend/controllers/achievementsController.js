@@ -1,5 +1,4 @@
 const axios = require("axios");
-const fs = require("fs");
 const mc = require("mongodb");
 
 const mongo = new mc.MongoClient("mongodb://localhost:27017", {
@@ -17,6 +16,7 @@ const getAchievements = (apiKey, appId, steamId) => {
   return pwg.findOne({ steamId: steamId, appId: appId }).then((record) => {
     const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
     if (record === null || record.updatedAt < yesterday) {
+      console.log("steam retrieval");
       return retrieveAchievements(apiKey, appId, steamId).then((resAch) => {
         pwg.updateOne(
           { steamId: steamId, appId: appId },
@@ -36,6 +36,7 @@ const getAchievements = (apiKey, appId, steamId) => {
         return resAch;
       });
     } else {
+      console.log("database retreival");
       return {
         achievements: record.achievements,
         totalAchieved: record.totalAchieved,
@@ -43,6 +44,21 @@ const getAchievements = (apiKey, appId, steamId) => {
     }
   });
 };
+
+// const upsertGlobalStats = (id) => {
+//   const
+
+//   return axios
+//     .get(
+//       "https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/",
+//       {
+//         params: {
+//           gameid: id,
+//         },
+//       },
+//     )
+//     .then((response) => response.data);
+// };
 
 const retrieveAchievements = (apiKey, appId, steamId) => {
   const achievements = {};
@@ -81,39 +97,4 @@ const retrieveAchievements = (apiKey, appId, steamId) => {
     .then(() => achievements);
 };
 
-const getGames = (apiKey, steamId) => {
-  return axios
-    .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/", {
-      params: {
-        key: apiKey,
-        steamid: steamId,
-        include_appinfo: 1,
-        include_played_free_games: 1,
-      },
-    })
-    .then((res) => res.data.response.games)
-    .then((gamesOwned) => {
-      const games = [];
-
-      for (const game of gamesOwned) {
-        if (Object.hasOwn(game, "has_community_visible_stats")) {
-          games.push({
-            appid: game.appid,
-            title: game.name,
-            playtime: game.playtime_forever,
-            lastPlayed: game.rtime_last_played,
-            appImage:
-              "https://media.steampowered.com/steamcommunity/public/images/apps/" +
-              game.appid +
-              "/" +
-              game.img_icon_url +
-              ".jpg",
-          });
-        }
-      }
-
-      return games;
-    });
-};
-
-module.exports = { getAchievements, getGames };
+module.exports = { getAchievements };

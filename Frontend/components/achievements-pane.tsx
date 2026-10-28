@@ -3,14 +3,23 @@ import { GameCapsule } from "./game-capsule";
 import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
 import { per } from "./achievements-view";
 import { cn } from "@/lib/utils";
+import { AchievementCard } from "./achievement-card";
 
 export function AchievementsPane({
   achievementsData,
   selectedGame,
+  globalGameStatistics,
 }: {
   achievementsData: AchievementsData;
-  selectedGame: QuickGameInfo;
+  selectedGame: string[];
+  globalGameStatistics: any;
 }) {
+  achievementsData.achievements.sort((a: Achievement, b: Achievement) => {
+    return a.achieved === b.achieved
+      ? b.name.localeCompare(a.name)
+      : b.achieved - a.achieved;
+  });
+
   return (
     <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
       {/* Left: summary */}
@@ -19,18 +28,16 @@ export function AchievementsPane({
           <GameCapsule
             game={
               {
-                appid: parseInt(selectedGame.appId),
-                appImage: selectedGame.appImage,
-                title: selectedGame.title,
+                appid: parseInt(selectedGame[0]),
+                appImage: globalGameStatistics.image,
+                title: selectedGame[1],
               }
               /* sizes="300px"
                 // priority */
             }
           />
           <div className="p-4">
-            <h2 className="font-semibold text-foreground">
-              {selectedGame.title}
-            </h2>
+            <h2 className="font-semibold text-foreground">{selectedGame[1]}</h2>
             {/* <p className="text-xs text-muted-foreground">
                   {selectedGame.developer}
                 </p> */}
@@ -105,62 +112,17 @@ export function AchievementsPane({
             All achievements
           </h3>
           <ul className="flex flex-col gap-2">
-            {achievementsData.achievements
-              .sort((a: Achievement, b: Achievement) => b.achieved - a.achieved)
-              .map((a) => (
-                <li
-                  key={a.aId}
-                  className={cn(
-                    "rounded-lg border border-border bg-card p-4",
-                    !a.achieved && "opacity-80",
+            {/* insert achivemenet card here */}
+            {achievementsData.achievements.map((achieve) => {
+              return (
+                <AchievementCard
+                  playerAchieve={achieve}
+                  globalAchieve={globalGameStatistics.achievements.find(
+                    (a: any) => a.name === achieve.aId,
                   )}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={cn(
-                        "mt-0.5 grid size-9 shrink-0 place-items-center rounded-md",
-                        a.achieved
-                          ? "bg-primary/15 text-primary"
-                          : "bg-secondary/60 text-muted-foreground",
-                      )}
-                    >
-                      {a.achieved ? (
-                        <Check className="size-5" />
-                      ) : (
-                        <Lock className="size-4" />
-                      )}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="font-medium text-foreground">{a.name}</p>
-                        {a.achieved === 1 && a.time && (
-                          <span className="shrink-0 text-xs text-muted-foreground">
-                            {a.time}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {a.description}
-                      </p>
-
-                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                        <LabeledBar
-                          icon={<Globe className="size-3" />}
-                          label="Global"
-                          value={a.globalPct}
-                          tone="muted"
-                        />
-                        <LabeledBar
-                          icon={<Users className="size-3" />}
-                          label="Friends"
-                          value={a.friendsPct}
-                          tone="ingame"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              ))}
+                />
+              );
+            })}
           </ul>
         </div>
       </div>
@@ -220,7 +182,7 @@ function ComparisonRow({
   );
 }
 
-function LabeledBar({
+export function LabeledBar({
   icon,
   label,
   value,

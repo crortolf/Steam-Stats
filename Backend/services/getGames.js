@@ -9,7 +9,7 @@ const mongo = new mc.MongoClient("mongodb://localhost:27017", {
   },
 }).db("Steam-Stats");
 
-const getGameInfo = (apiKey, appIds) => {
+const getGamesInfo = (apiKey, appIds) => {
   const games = mongo.collection("Games");
   const gamesData = [];
 
@@ -19,43 +19,31 @@ const getGameInfo = (apiKey, appIds) => {
         .findOne({ _id: Number(appId) })
         .then((record) => {
           if (record === null) {
-            console.log(record);
-            return retrieveGameInfo(apiKey, appId).then((resGame) => {
-              const newGame = {
-                _id: resGame.id,
-                name: resGame.name,
-                icon: resGame.icon,
-                image: resGame.image,
-                description: resGame.description,
-                publishDate: resGame.publishDate,
-                publishers: resGame.publishers,
-                developers: resGame.developers,
-                achievements: resGame.achievements,
-              };
-              games.insertOne(newGame);
+            console.log("steam retreival");
+            return retrieveGameInfo(apiKey, appId).then(
+              ({ id, ...resGame }) => {
+                const newGame = {
+                  _id: id,
+                  ...resGame,
+                };
+                games.insertOne(newGame);
 
-              return resGame;
-            });
-          } else {
-            console.log("db check");
-            return {
-              id: record._id,
-              name: record.name,
-              icon: record.icon,
-              image: record.image,
-              description: record.description,
-              publishDate: record.publishDate,
-              publishers: record.publishers,
-              developers: record.developers,
-              achievements: record.achievements,
-            };
+                return resGame;
+              },
+            );
           }
+          console.log("database retreival");
+          return record;
+        })
+        .then(({ _id, ...resRecord }) => {
+          return {
+            id: _id,
+            ...resRecord,
+          };
         })
         .catch((e) => console.log(e)),
     );
   }
-
-  console.log(gamesData);
 
   return Promise.all(gamesData);
 };
@@ -92,7 +80,8 @@ const retrieveGameInfo = (apiKey, appId) => {
             publishers: game.publishers,
             achievements: achievements,
           };
-        });
+        })
+        .catch((e) => console.log(e));
     });
 };
 
@@ -115,4 +104,117 @@ const insertAchivementsPercentage = (appId, achievements) => {
     });
 };
 
-module.exports = { getGameInfo };
+// const getIdsTitles = (key, ids) => {
+//   const idTitle = [];
+
+//   getGamesInfo(key, ids).then((games) => {
+//     for (const game of games) {
+//       idTitle.push([game.id, game.name]);
+//     }
+//   });
+
+//   return idTitle;
+// };
+
+//have to get the player. if empty or old, retreive player
+//if the games list exists and is not old, then use
+//else, retreive games list. Update all games in list <- maybe save for later
+
+const getOwnedGames = (key, id) => {
+  const owned = mongo.collection("OwnedGames");
+
+  try {
+    return owned.findOne({ _id: id }).then((record) => {
+      const yesterday = new Date(Date() - 24 * 60 * 60 * 1000);
+      if (record === null || record.lastUpdated < yesterday) {
+        console.log("steam retreival");
+        return axios
+          .get(
+            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/",
+            {
+              params: {
+                key: key,
+                steamid: id,
+                include_appinfo: true,
+              },
+            },
+          )
+          .then((response) => response.data.response.games)
+          .then((retrievedGames) => {
+            const mappedGames = retrievedGames.map(
+              ({ appid, name, playtime_forever, rtime_last_played }) => {
+                return {
+                  id: appid,
+                  title: name,
+                  playtime: playtime_forever,
+                  lastPlayed: rtime_last_played,
+                };
+              },
+            );
+            owned.insertOne({
+              _id: id,
+              lastUpdated: new Date(),
+              games: mappedGames,
+            });
+            return {
+              id: id,
+              games: mappedGames,
+            };
+          });
+      } else {
+        console.log("database retreival");
+        const { _id, games } = record;
+        return {
+          id: _id,
+          games: games,
+        };
+      }
+    });
+  } catch {}
+};
+
+// const games = mongo.collection("Games");
+// const players = mongo.collection("Players");
+
+// return players.findOne({_id: id}).then(playerRecord => {
+//   const yesterday = new Date(Date() - 24 * 60 * 60 * 1000);
+//   if (playerRecord === null || playerRecord.games == null || playerRecord.games.lastUpdated === null || playerRecord.games.lastUpdated < yesterday) {
+//     return axios
+//   .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/", {
+//     params: {
+//       steamid: id,
+//       key: key,
+//       include_appinfo: true,
+//     },
+//   })
+//   .then((results) => {
+//     results.response.games.forEach(({ appid, name }) => {
+//       return games.find({ _id: appid }).then((record) => {
+//         if (record === null) {
+//           games.insertOne({ _id: appid, title: name });
+//         }
+// })
+
+// return axios
+//   .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/", {
+//     params: {
+//       steamid: id,
+//       key: key,
+//       include_appinfo: true,
+//     },
+//   })
+//   .then((results) => {
+//     results.response.games.forEach(({ appid, name }) => {
+//       return games.find({ _id: appid }).then((record) => {
+//         if (record === null) {
+//           const newGame = { _id: appid, title: name };
+//           games.insertOne(newGame);
+//           return { id: appid, title: name };
+//         }
+//         return { id: appid, title: name };
+//       });
+//     });
+//   });
+//};
+
+module.exports = { getGamesInfo, getOwnedGames };
