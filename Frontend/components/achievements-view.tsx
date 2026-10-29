@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
-import { AchievementsData, Achievement, QuickGameInfo } from "@/lib/types";
+import {
+  AchievementsData,
+  Achievement,
+  QuickGameInfo,
+  SumAchievementData,
+} from "@/lib/types";
 import { GameCapsule } from "@/components/game-capsule";
 import {
   Select,
@@ -16,16 +21,17 @@ import axios from "axios";
 import { TotalAchievePercent } from "./ui/total-achieve-percent";
 import { AchievementsPane } from "./achievements-pane";
 
-export const per = (a: AchievementsData) => {
-  return Math.round((a.totalAchieved / a.achievements.length) * 100);
+export const per = (a: SumAchievementData) => {
+  return a.totalAchieves > 0
+    ? Math.round((a.totalAchieved / a.totalAchieves) * 100)
+    : 0;
 };
 
 export function AchievementsView() {
   const [selectedGame, setSelectedGame] = useState<string[] | null>(null);
   const [games, setGames] = useState<string[][] | null>(null);
-  const [playerAchievementsData, setPlayerAchievementsData] =
-    useState<AchievementsData | null>(null);
-  const [globalAchievementsData, setGlobalAchievementsData] = useState(null);
+  const [achievementsData, setAchievementsData] =
+    useState<SumAchievementData | null>(null);
   const [gamesLoading, setGamesLoading] = useState(true);
   const [gamesError, setGamesError] = useState<string | null>(null);
   const [achievementsLoading, setAchievementsLoading] = useState(true);
@@ -76,41 +82,29 @@ export function AchievementsView() {
 
     //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
     function load() {
-      console.log(selectedGame ? selectedGame[0] : undefined);
-      axios
-        .get("http://localhost:5011/achievements/getAchievements/", {
-          params: {
-            apiKey: process.env.NEXT_PUBLIC_API_KEY,
-            appId: selectedGame ? selectedGame[0] : undefined,
-            steamId: process.env.NEXT_PUBLIC_CF_ID,
-          },
-          signal: controller.signal,
-        })
-        .then((res) => {
-          setPlayerAchievementsData(res.data);
-          axios
-            .get(
-              "http://localhost:5011/achievements/getGameAchievementsInfo/",
-              {
-                params: {
-                  key: process.env.NEXT_PUBLIC_API_KEY,
-                  id: selectedGame ? selectedGame[0] : undefined,
-                },
-              },
-            )
-            .then((response) => {
-              setGlobalAchievementsData(response.data);
-            })
-            .finally(() => {
-              setAchievementsLoading(false);
-              console.log("Achieves loaded");
-            });
-        })
-        .catch((err) => {
-          if (!axios.isCancel(err)) {
-            setAchievementsError("Failed to load achievements");
-          }
-        });
+      if (selectedGame !== null) {
+        axios
+          .get("http://localhost:5011/achievements/getAchievements/", {
+            params: {
+              apiKey: process.env.NEXT_PUBLIC_API_KEY,
+              appId: selectedGame[0],
+              steamId: process.env.NEXT_PUBLIC_CF_ID,
+            },
+            signal: controller.signal,
+          })
+          .then((res) => {
+            setAchievementsData(res.data);
+          })
+          .catch((err) => {
+            if (!axios.isCancel(err)) {
+              setAchievementsError("Failed to load achievements");
+            }
+          })
+          .finally(() => {
+            setAchievementsLoading(false);
+            console.log("Achievements loaded");
+          });
+      }
     }
 
     load();
@@ -150,10 +144,8 @@ export function AchievementsView() {
 
   console.log("Games are:");
   console.log(games);
-  console.log("Achieves are:");
-  console.log(playerAchievementsData);
-  console.log("Global Data is:");
-  console.log(globalAchievementsData);
+  console.log("Achieves Data is:");
+  console.log(achievementsData);
 
   if (gamesLoading) return <div>Loading...</div>;
   if (achievementsError) return <div>Achievements error encountered</div>;
@@ -184,12 +176,11 @@ export function AchievementsView() {
           ))}
         </SelectContent>
       </Select>
-      {!achievementsLoading && playerAchievementsData && selectedGame && (
-        <AchievementsPane
-          achievementsData={playerAchievementsData}
-          selectedGame={selectedGame}
-          globalGameStatistics={globalAchievementsData}
-        />
+      {!achievementsLoading && achievementsData && selectedGame && (
+        <div>
+          <br />
+          <AchievementsPane achievementsData={achievementsData} />
+        </div>
       )}
     </div>
   );

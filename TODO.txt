@@ -1,0 +1,6 @@
+make sure news articles are displaying with their news image
+news article popup
+
+change inserts to upserts
+
+sort achievements by global percent, give sort options

@@ -1,70 +1,70 @@
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { LabeledBar } from "./achievements-pane";
-import { Globe } from "lucide-react";
+import { Globe, Users } from "lucide-react";
+import { SumAchievement } from "@/lib/types";
+import { per } from "./achievements-view";
 
 export function AchievementCard({
-  playerAchieve,
-  globalAchieve,
+  name,
+  achieve,
+  friendsScanned,
 }: {
-  playerAchieve: any;
-  globalAchieve: any;
+  name: string;
+  achieve: SumAchievement;
+  friendsScanned: number;
 }) {
-  console.log(globalAchieve);
-
   return (
     <li
-      key={playerAchieve.aId}
+      key={name}
       className={cn(
         "rounded-lg border border-border bg-card p-4",
-        !playerAchieve.achieved && "opacity-80",
+        achieve.achieved && "opacity-80",
       )}
     >
       <div className="flex items-start gap-3">
         <span
           className={cn(
             "mt-0.5 grid size-9 shrink-0 place-items-center rounded-md",
-            playerAchieve.achieved
+            achieve.achieved
               ? "bg-primary/15 text-primary"
               : "bg-secondary/60 text-muted-foreground",
           )}
         >
           <Image
-            src={
-              playerAchieve.achieved === 1
-                ? globalAchieve.icon
-                : globalAchieve.icongray
-            }
-            alt={"Icon for " + playerAchieve.name}
+            src={achieve.achieved === 1 ? achieve.icon : achieve.icongray}
+            alt={"Icon for " + name}
             width={30}
             height={30}
           />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
-            <p className="font-medium text-foreground">{playerAchieve.name}</p>
+            <p className="font-medium text-foreground">{achieve.name}</p>
 
             <span className="shrink-0 text-xs text-muted-foreground">
-              {playerAchieve.achieved === 1 ? playerAchieve.time : "Locked"}
+              {achieve.achieved === 1 ? achieve.time : "Locked"}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {playerAchieve.description}
-          </p>
+          <p className="text-sm text-muted-foreground">{achieve.description}</p>
 
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             <LabeledBar
               icon={<Globe className="size-3" />}
               label="Global"
-              value={globalAchieve.globalPercent}
+              value={achieve.globalPercent}
               tone="muted"
             />
-            {/*<LabeledBar
-              icon={<Users className="size-3" />}
-              label="Friends"
-              value={playerAchieve.friendsPct}
-              tone="ingame"
-            /> */}
+            {friendsScanned > 0 && (
+              <LabeledBar
+                icon={<Users className="size-3" />}
+                label="Friends"
+                value={Number(
+                  ((achieve.friendsAchieved / friendsScanned) * 100).toFixed(1),
+                )}
+                tone="ingame"
+              />
+            )}
           </div>
         </div>
       </div>

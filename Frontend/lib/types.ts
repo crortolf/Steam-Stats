@@ -42,3 +42,31 @@ export type QuickGameInfo = {
   lastPlayed: string;
   appImage: string;
 };
+
+export type SumAchievementData = {
+  totalFriendsAchievements: number;
+  id: number;
+  totalFriendsScanned: number;
+  totalAchieves: number;
+  totalAchieved: number;
+  totalGlobalAchievesPercent: number;
+  achievements: Record<string, SumAchievement>;
+  name: string;
+  icon: string;
+  image: string;
+  description: string;
+  publishDate: string;
+  developers: string[];
+  publishers: string[];
+};
+
+export type SumAchievement = {
+  achieved: number;
+  time: string;
+  name: string;
+  description: string;
+  friendsAchieved: number;
+  icon: string;
+  icongray: string;
+  globalPercent: number;
+};

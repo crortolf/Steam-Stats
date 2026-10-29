@@ -4,6 +4,7 @@ const app = express();
 const friendWeb = require("./routes/friendWeb");
 const circleNews = require("./routes/circleNews");
 const achievements = require("./routes/achievements");
+const { doesFriendOwn } = require("./controllers/achievementsController");
 
 app.use(cors());
 

@@ -87,6 +87,7 @@ const retrieveGameInfo = (apiKey, appId) => {
 
 const insertAchivementsPercentage = (appId, achievements) => {
   const percentages = {};
+  console.log("steam retreival inserting global percentages for " + appId);
 
   return axios
     .get(
@@ -141,33 +142,37 @@ const getOwnedGames = (key, id) => {
           )
           .then((response) => response.data.response.games)
           .then((retrievedGames) => {
-            const mappedGames = retrievedGames.map(
-              ({ appid, name, playtime_forever, rtime_last_played }) => {
-                return {
-                  id: appid,
-                  title: name,
-                  playtime: playtime_forever,
-                  lastPlayed: rtime_last_played,
-                };
+            const mappedGames =
+              retrievedGames === null || retrievedGames === undefined
+                ? []
+                : retrievedGames.map(
+                    ({ appid, name, playtime_forever, rtime_last_played }) => {
+                      return {
+                        id: appid,
+                        title: name,
+                        playtime: playtime_forever,
+                        lastPlayed: rtime_last_played,
+                      };
+                    },
+                  );
+            owned.updateOne(
+              { _id: id },
+              {
+                $setOnInsert: {
+                  _id: id,
+                },
+                $set: {
+                  updatedAt: new Date(),
+                  games: mappedGames,
+                },
               },
+              { upsert: true },
             );
-            owned.insertOne({
-              _id: id,
-              lastUpdated: new Date(),
-              games: mappedGames,
-            });
-            return {
-              id: id,
-              games: mappedGames,
-            };
+            return mappedGames;
           });
       } else {
         console.log("database retreival");
-        const { _id, games } = record;
-        return {
-          id: _id,
-          games: games,
-        };
+        return record.games;
       }
     });
   } catch {}

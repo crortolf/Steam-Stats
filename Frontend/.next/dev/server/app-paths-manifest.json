@@ -1,5 +1,6 @@
 {
   "/achievements/page": "app/achievements/page.js",
   "/games/page": "app/games/page.js",
-  "/network/page": "app/network/page.js"
+  "/network/page": "app/network/page.js",
+  "/profile/page": "app/profile/page.js"
 }

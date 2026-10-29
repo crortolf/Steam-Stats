@@ -1,50 +1,55 @@
-import { AchievementsData, QuickGameInfo, Achievement } from "@/lib/types";
+import {
+  AchievementsData,
+  QuickGameInfo,
+  Achievement,
+  SumAchievementData,
+} from "@/lib/types";
 import { GameCapsule } from "./game-capsule";
 import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
 import { per } from "./achievements-view";
 import { cn } from "@/lib/utils";
 import { AchievementCard } from "./achievement-card";
+import { achievements } from "@/lib/mock-data";
 
 export function AchievementsPane({
   achievementsData,
-  selectedGame,
-  globalGameStatistics,
 }: {
-  achievementsData: AchievementsData;
-  selectedGame: string[];
-  globalGameStatistics: any;
+  achievementsData: SumAchievementData;
 }) {
-  achievementsData.achievements.sort((a: Achievement, b: Achievement) => {
-    return a.achieved === b.achieved
-      ? b.name.localeCompare(a.name)
-      : b.achieved - a.achieved;
-  });
-
+  const [rarestAchieveId, rarestAchieve] = Object.entries(
+    achievementsData.achievements,
+  ).reduce(([rarestId, rarest], [currentId, current]) =>
+    rarest.globalPercent < current.globalPercent
+      ? [rarestId, rarest]
+      : [currentId, current],
+  );
   return (
     <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
       {/* Left: summary */}
       <div className="flex flex-col gap-4">
         <div className="overflow-hidden rounded-xl border border-border bg-card">
           <GameCapsule
-            game={
-              {
-                appid: parseInt(selectedGame[0]),
-                appImage: globalGameStatistics.image,
-                title: selectedGame[1],
-              }
-              /* sizes="300px"
-                // priority */
-            }
+            game={{
+              appid: achievementsData.id,
+              appImage: achievementsData.image,
+              title: achievementsData.name,
+            }}
+            sizes="300px"
+            priority
           />
           <div className="p-4">
-            <h2 className="font-semibold text-foreground">{selectedGame[1]}</h2>
-            {/* <p className="text-xs text-muted-foreground">
-                  {selectedGame.developer}
-                </p> */}
+            <h2 className="font-semibold text-foreground">
+              {achievementsData.name}
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Developed by {achievementsData.developers.join(", ")}
+              <br />
+              Published by {achievementsData.publishers.join(", ")}
+            </p>
           </div>
         </div>
         {/* completion ring-ish */}
-        <div className="rounded-xl border border-border bg-card p-5">
+        {/* <div className="rounded-xl border border-border bg-card p-5">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Trophy className="size-4 text-primary" /> Your completion
           </div>
@@ -52,11 +57,11 @@ export function AchievementsPane({
             {per(achievementsData)}
             <span className="text-2xl text-muted-foreground">%</span>
           </p>
-          {/* <Bar value={per(achievementsData} tone="primary" className="mt-3" /> */}
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {/* Global standing and among friends area */}
-          {/* <StandingCard
+          <Bar value={per(achievementsData} tone="primary" className="mt-3" />
+        </div> */}
+        {/* <div className="grid grid-cols-2 gap-4">
+          Global standing and among friends area
+          <StandingCard
                 icon={<Globe className="size-4" />}
                 label="Global standing"
                 value={`Top ${stats.globalTopPct}%`}
@@ -67,44 +72,64 @@ export function AchievementsPane({
                 label="Among friends"
                 value={`Top ${stats.friendsTopPct}%`}
                 hint="who played this"
-              /> */}
-        </div>
-        {/* {stats.rarest && (
-              <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-primary">
-                  Rarest unlock
-                </p>
-                <p className="mt-1 font-semibold text-foreground">
-                  {stats.rarest.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  Only {stats.rarest.globalPct}% of players have this
-                </p>
-              </div>
-            )} */}
+              />
+        </div> */}
+        {rarestAchieve && (
+          <div className="rounded-xl border border-primary/30 bg-primary/10 p-4">
+            <p className="text-xs font-medium uppercase tracking-wide text-primary">
+              Rarest unlock
+            </p>
+            <p className="mt-1 font-semibold text-foreground">
+              {rarestAchieve.name}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Only {rarestAchieve.globalPercent}% of players have this
+            </p>
+          </div>
+        )}
         {/* rarest achieve */}
       </div>
       {/* Right: comparison + achievement list */}
       <div className="flex flex-col gap-6">
+        <p className="text-m text-muted-foreground">
+          {achievementsData.totalFriendsScanned} friends have this game and
+          achievements public
+        </p>
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 font-semibold text-foreground">
             Completion, compared
           </h3>
           <ComparisonRow
             label="You"
-            value={per(achievementsData)}
+            value={Number(
+              (
+                (achievementsData.totalAchieved /
+                  achievementsData.totalAchieves) *
+                100
+              ).toFixed(1),
+            )}
             tone="primary"
           />
-          {/* <ComparisonRow
-                label="Your friends (avg)"
-                value={stats.friendsAvgCompletion}
-                tone="ingame"
-              />
-              <ComparisonRow
-                label="Global players (avg)"
-                value={stats.globalAvgCompletion}
-                tone="muted"
-              /> */}
+          {achievementsData.totalFriendsScanned > 0 && (
+            <ComparisonRow
+              label="Your friends (avg)"
+              value={Number(
+                (
+                  (achievementsData.totalFriendsAchievements /
+                    achievementsData.totalAchieves /
+                    achievementsData.totalFriendsScanned) *
+                  100
+                ).toFixed(1),
+              )}
+              tone="ingame"
+            />
+          )}
+
+          <ComparisonRow
+            label="Global players (avg)"
+            value={achievementsData.totalGlobalAchievesPercent}
+            tone="muted"
+          />
         </div>
 
         <div>
@@ -113,16 +138,17 @@ export function AchievementsPane({
           </h3>
           <ul className="flex flex-col gap-2">
             {/* insert achivemenet card here */}
-            {achievementsData.achievements.map((achieve) => {
-              return (
-                <AchievementCard
-                  playerAchieve={achieve}
-                  globalAchieve={globalGameStatistics.achievements.find(
-                    (a: any) => a.name === achieve.aId,
-                  )}
-                />
-              );
-            })}
+            {Object.entries(achievementsData.achievements).map(
+              ([name, achieve]) => {
+                return (
+                  <AchievementCard
+                    name={name}
+                    achieve={achieve}
+                    friendsScanned={achievementsData.totalFriendsScanned}
+                  />
+                );
+              },
+            )}
           </ul>
         </div>
       </div>
@@ -173,9 +199,7 @@ function ComparisonRow({
     <div className="mb-4 last:mb-0">
       <div className="mb-1.5 flex items-center justify-between text-sm">
         <span className="text-foreground">{label}</span>
-        <span className="font-mono text-muted-foreground">
-          {Math.round(value)}%
-        </span>
+        <span className="font-mono text-muted-foreground">{value}%</span>
       </div>
       <Bar value={value} tone={tone} />
     </div>
