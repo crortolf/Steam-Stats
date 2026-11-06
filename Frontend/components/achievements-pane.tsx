@@ -1,21 +1,118 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import {
   AchievementsData,
   QuickGameInfo,
   Achievement,
+  SumAchievement,
   SumAchievementData,
 } from "@/lib/types";
 import { GameCapsule } from "./game-capsule";
-import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
+import { Trophy, Lock, Check, Globe, Users, ArrowUp, ArrowDown } from "lucide-react";
 import { per } from "./achievements-view";
 import { cn } from "@/lib/utils";
 import { AchievementCard } from "./achievement-card";
 import { achievements } from "@/lib/mock-data";
+import { Button } from "@/components/ui/button";
+
+type SortKey = "global" | "friends" | "unlocked" | "name";
+type SortDir = "asc" | "desc";
+
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: "global", label: "Global rarity" },
+  { key: "friends", label: "Friend rarity" },
+  { key: "unlocked", label: "Unlocked" },
+  { key: "name", label: "Name" },
+];
+
+const DEFAULT_DIR: Record<SortKey, SortDir> = {
+  global: "asc",
+  friends: "asc",
+  unlocked: "desc",
+  name: "asc",
+};
+
+function friendRate(achieve: SumAchievement, friendsScanned: number) {
+  return friendsScanned > 0 ? achieve.friendsAchieved / friendsScanned : 0;
+}
+
+function compareAchievements(
+  a: SumAchievement,
+  b: SumAchievement,
+  key: SortKey,
+  dir: SortDir,
+  friendsScanned: number,
+) {
+  const sign = dir === "asc" ? 1 : -1;
+  let delta = 0;
+
+  switch (key) {
+    case "global":
+      delta = a.globalPercent - b.globalPercent;
+      break;
+    case "friends":
+      delta = friendRate(a, friendsScanned) - friendRate(b, friendsScanned);
+      break;
+    case "unlocked":
+      delta = a.achieved - b.achieved;
+      break;
+    case "name":
+      delta = a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      break;
+  }
+
+  if (delta !== 0) return delta * sign;
+  return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+}
+
+function sortHint(key: SortKey, dir: SortDir) {
+  switch (key) {
+    case "global":
+    case "friends":
+      return dir === "asc" ? "Rarest first" : "Most common first";
+    case "unlocked":
+      return dir === "desc" ? "Unlocked first" : "Locked first";
+    case "name":
+      return dir === "asc" ? "A to Z" : "Z to A";
+  }
+}
 
 export function AchievementsPane({
   achievementsData,
 }: {
   achievementsData: SumAchievementData;
 }) {
+  const [sortKey, setSortKey] = useState<SortKey>("global");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const sortedAchievements = useMemo(
+    () =>
+      Object.entries(achievementsData.achievements).sort(([, a], [, b]) =>
+        compareAchievements(
+          a,
+          b,
+          sortKey,
+          sortDir,
+          achievementsData.totalFriendsScanned,
+        ),
+      ),
+    [
+      achievementsData.achievements,
+      achievementsData.totalFriendsScanned,
+      sortKey,
+      sortDir,
+    ],
+  );
+
+  function selectSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir((dir) => (dir === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortKey(key);
+    setSortDir(DEFAULT_DIR[key]);
+  }
   const [rarestAchieveId, rarestAchieve] = Object.entries(
     achievementsData.achievements,
   ).reduce(([rarestId, rarest], [currentId, current]) =>
@@ -133,22 +230,53 @@ export function AchievementsPane({
         </div>
 
         <div>
-          <h3 className="mb-3 font-semibold text-foreground">
-            All achievements
-          </h3>
-          <ul className="flex flex-col gap-2">
-            {/* insert achivemenet card here */}
-            {Object.entries(achievementsData.achievements).map(
-              ([name, achieve]) => {
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-semibold text-foreground">All achievements</h3>
+            <div
+              className="flex flex-wrap gap-2"
+              role="group"
+              aria-label="Sort achievements"
+            >
+              {SORTS.map((sort) => {
+                const active = sort.key === sortKey;
                 return (
-                  <AchievementCard
-                    name={name}
-                    achieve={achieve}
-                    friendsScanned={achievementsData.totalFriendsScanned}
-                  />
+                  <Button
+                    key={sort.key}
+                    type="button"
+                    size="sm"
+                    variant={active ? "default" : "outline"}
+                    aria-pressed={active}
+                    title={
+                      active
+                        ? `${sortHint(sort.key, sortDir)}. Click to reverse.`
+                        : `Sort by ${sort.label.toLowerCase()}`
+                    }
+                    onClick={() => selectSort(sort.key)}
+                  >
+                    {sort.label}
+                    {active &&
+                      (sortDir === "asc" ? (
+                        <ArrowUp aria-hidden />
+                      ) : (
+                        <ArrowDown aria-hidden />
+                      ))}
+                  </Button>
                 );
-              },
-            )}
+              })}
+            </div>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">
+            {sortHint(sortKey, sortDir)}
+          </p>
+          <ul className="flex flex-col gap-2">
+            {sortedAchievements.map(([name, achieve]) => (
+              <AchievementCard
+                key={name}
+                name={name}
+                achieve={achieve}
+                friendsScanned={achievementsData.totalFriendsScanned}
+              />
+            ))}
           </ul>
         </div>
       </div>

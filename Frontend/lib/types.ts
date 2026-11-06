@@ -17,9 +17,9 @@ export type GameNews = {
 };
 
 export type Game = {
-  appImage: string;
-  appid: number;
-  title: string;
+  image: string;
+  id: number;
+  name: string;
 };
 
 export type Achievement = {

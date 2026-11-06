@@ -1,4 +1,5 @@
 const axios = require("axios");
+const fs = require("fs");
 const mc = require("mongodb");
 
 const mongo = new mc.MongoClient("mongodb://localhost:27017", {
@@ -19,18 +20,21 @@ const getGamesInfo = (apiKey, appIds) => {
         .findOne({ _id: Number(appId) })
         .then((record) => {
           if (record === null) {
-            console.log("steam retreival");
-            return retrieveGameInfo(apiKey, appId).then(
-              ({ id, ...resGame }) => {
-                const newGame = {
-                  _id: id,
-                  ...resGame,
-                };
-                games.insertOne(newGame);
-
-                return resGame;
-              },
+            fs.appendFileSync(
+              "attemptedRetreivals.txt",
+              "steam retreival with key " + apiKey + " for app " + appId,
             );
+            return retrieveGameInfo(apiKey, appId).then((retreivedGameInfo) => {
+              if (retreivedGameInfo === undefined) return null;
+              const { id, ...resGame } = retreivedGameInfo;
+              const newGame = {
+                _id: id,
+                ...resGame,
+              };
+              games.insertOne(newGame);
+
+              return resGame;
+            });
           }
           console.log("database retreival");
           return record;
@@ -105,18 +109,6 @@ const insertAchivementsPercentage = (appId, achievements) => {
     });
 };
 
-// const getIdsTitles = (key, ids) => {
-//   const idTitle = [];
-
-//   getGamesInfo(key, ids).then((games) => {
-//     for (const game of games) {
-//       idTitle.push([game.id, game.name]);
-//     }
-//   });
-
-//   return idTitle;
-// };
-
 //have to get the player. if empty or old, retreive player
 //if the games list exists and is not old, then use
 //else, retreive games list. Update all games in list <- maybe save for later
@@ -177,49 +169,5 @@ const getOwnedGames = (key, id) => {
     });
   } catch {}
 };
-
-// const games = mongo.collection("Games");
-// const players = mongo.collection("Players");
-
-// return players.findOne({_id: id}).then(playerRecord => {
-//   const yesterday = new Date(Date() - 24 * 60 * 60 * 1000);
-//   if (playerRecord === null || playerRecord.games == null || playerRecord.games.lastUpdated === null || playerRecord.games.lastUpdated < yesterday) {
-//     return axios
-//   .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/", {
-//     params: {
-//       steamid: id,
-//       key: key,
-//       include_appinfo: true,
-//     },
-//   })
-//   .then((results) => {
-//     results.response.games.forEach(({ appid, name }) => {
-//       return games.find({ _id: appid }).then((record) => {
-//         if (record === null) {
-//           games.insertOne({ _id: appid, title: name });
-//         }
-// })
-
-// return axios
-//   .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/", {
-//     params: {
-//       steamid: id,
-//       key: key,
-//       include_appinfo: true,
-//     },
-//   })
-//   .then((results) => {
-//     results.response.games.forEach(({ appid, name }) => {
-//       return games.find({ _id: appid }).then((record) => {
-//         if (record === null) {
-//           const newGame = { _id: appid, title: name };
-//           games.insertOne(newGame);
-//           return { id: appid, title: name };
-//         }
-//         return { id: appid, title: name };
-//       });
-//     });
-//   });
-//};
 
 module.exports = { getGamesInfo, getOwnedGames };

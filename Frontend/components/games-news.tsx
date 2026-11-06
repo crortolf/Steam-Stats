@@ -18,17 +18,21 @@ export function GamesNews() {
   const [error, setError] = useState<string | null>(null);
   const [selectedGame, setSelectedGame] = useState<GameNews | null>(null);
 
+  console.log(gamesNews);
+
   useEffect(() => {
     const controller = new AbortController();
 
     //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
     function load() {
       axios
-        .get("http://localhost:5011/circleNews/getNews", {
+        .get<GameNews[]>("http://localhost:5011/circleNews/getNews", {
           params: { id: TEMP_USERDATA },
           signal: controller.signal,
         })
-        .then((res) => setGamesNews(res.data))
+        .then((res) => {
+          setGamesNews(res.data.filter((g) => g.game !== undefined));
+        })
         .catch((err) => {
           if (!axios.isCancel(err)) {
             setError("Failed to load news");
@@ -64,7 +68,7 @@ export function GamesNews() {
           {gamesNews.map((p) => {
             return (
               <li
-                key={`${p.game.appid}`}
+                key={`${p.game.id}`}
                 className="flex gap-3 rounded-lg border border-border bg-card p-3 hover:border-primary/40"
                 onClick={() => {
                   if (selectedGame === p) setSelectedGame(null);
@@ -76,12 +80,14 @@ export function GamesNews() {
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col">
                   <p className="truncate font-semibold text-foreground">
-                    {p.game.title}
+                    {p.game.name}
                   </p>
                   <div className="mt-auto flex items-center gap-2 overflow-x-auto pt-2">
-                    {p.players.map((friendPlayer) => {
-                      return <FriendCapsule friendPlayer={friendPlayer} />;
-                    })}
+                    {p.players
+                      .filter((f) => f !== null)
+                      .map((friendPlayer) => {
+                        return <FriendCapsule friendPlayer={friendPlayer} />;
+                      })}
                   </div>
                 </div>
               </li>
@@ -114,14 +120,14 @@ export function GamesNews() {
                   <article className="flex flex-col">
                     <div className="relative aspect-[460/215] w-full">
                       <Image
-                        src={selectedGame.game.appImage || "/placeholder.svg"}
+                        src={selectedGame.game.image || "/placeholder.svg"}
                         alt=""
                         fill
                         sizes="(max-width: 1024px) 100vw, 480px"
                         className="object-cover"
                       />
                       <span className="absolute left-2 top-2 rounded bg-popover/90 px-2 py-0.5 text-xs font-medium text-foreground backdrop-blur">
-                        {selectedGame.game.title}
+                        {selectedGame.game.name}
                       </span>
                     </div>
                     <div className="p-4">
@@ -137,7 +143,7 @@ export function GamesNews() {
                         {n.title}
                       </h3>
                       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                        {n.contents.slice(0, 50)}
+                        {n.contents}
                       </p>
                     </div>
                   </article>

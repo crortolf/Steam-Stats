@@ -129,21 +129,6 @@ const spAchievementData = (key, app, user) => {
   });
 };
 
-// const upsertGlobalStats = (id) => {
-//   const
-
-//   return axios
-//     .get(
-//       "https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v0002/",
-//       {
-//         params: {
-//           gameid: id,
-//         },
-//       },
-//     )
-//     .then((response) => response.data);
-// };
-
 const retrieveAchievements = (apiKey, appId, steamId) => {
   const achievements = {};
   const pwg = mongo.collection("PlayerWithGame");

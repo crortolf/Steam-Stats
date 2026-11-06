@@ -36,10 +36,10 @@ const getIds = (key, id) => {
             {
               $setOnInsert: {
                 _id: id,
-                updatedAt: new Date(),
               },
               $set: {
                 friends: friends,
+                updatedAt: new Date(),
               },
             },
             { upsert: true },
