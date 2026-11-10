@@ -1,7 +1,15 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import type { Game } from "../lib/types";
 //TODO: add use for lastPlayed and playTime fields
+
+//callers pass either the Game shape (image/name) or the QuickGameInfo shape (appImage/title)
+type CapsuleGame = {
+  image?: string;
+  appImage?: string;
+  name?: string;
+  title?: string;
+  [key: string]: unknown;
+};
 
 export function GameCapsule({
   game,
@@ -11,7 +19,7 @@ export function GameCapsule({
   priority = false,
   sizes = "(max-width: 768px) 100vw, 320px",
 }: {
-  game: Game;
+  game: CapsuleGame;
   lastPlayed?: string;
   playtime?: string;
   className?: string;
@@ -26,8 +34,8 @@ export function GameCapsule({
       )}
     >
       <Image
-        src={game.appImage || "/placeholder.svg"}
-        alt={`${game.title} cover art`}
+        src={game.image || game.appImage || "/placeholder.svg"}
+        alt={`${game.name || game.title} cover art`}
         fill
         sizes={sizes}
         priority={priority}

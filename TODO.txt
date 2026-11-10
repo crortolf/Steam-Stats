@@ -1,6 +1,44 @@
-make sure news articles are displaying with their news image
-news article popup
 
-change inserts to upserts
 
-sort achievements by global percent, give sort options
+--- remaining issues from the news work (most urgent first) ---
+
+SECURITY
+[ ] replace your old Steam API key: it's no longer used by the code, but is still in git history (Frontend/.env, friendWebController.js)
+    - Frontend/.env is still committed: the .gitignore entry "Frontend/.env/" only matches a directory, change it to "Frontend/.env" and run git rm --cached
+[ ] Steam API keys in the Users collection are plaintext, and local mongo has no password - anyone who can reach the database can read them
+[ ] forgot password: there is no way back into an account without the current password, needs a way to send email
+[ ] email addresses aren't verified at sign up
+[x] Steam ID is still hardcoded to yours (games-news.tsx, friend-network.tsx, NEXT_PUBLIC_CF_ID): accounts need a Steam ID so each user sees their own data
+    - done: accounts store a steamId (set on the profile page), NEXT_PUBLIC_CF_ID removed from Frontend/.env
+[ ] set FRONTEND_ORIGIN and serve over https before deploying, the session cookie is only marked secure when NODE_ENV=production
+[ ] failed login limit is per email and kept in memory, so it resets on restart
+[ ] a Steam key revoked after saving can cache failures in the shared collections for an hour, which affects other users too - a 403 needs telling apart from a private profile
+    - now only Games (achievement schemas) is affected: player data is cached per key, so a revoked key's failures only affect that user
+[x] the Steam data cache is shared between users, so data fetched with one user's key is shown to others - decide whether anything needs to be kept per user
+    - done: privacy-dependent data (FriendsList, PlayerSummaries, Players, OwnedGames, RecentlyPlayed, PlayerWithGame) is cached per API key (keyScope/scopedId in services/cache.js), so users only see what their own key gets from Steam; Games, News and global percentages stay shared
+[ ] the old shared records in those six collections (plain steam id _id, or no "viewer" field in PlayerWithGame) are no longer read and can be deleted
+[ ] a user's Steam ID isn't verified, anyone can enter anyone's - it only picks whose data pages show (privacy is still decided by the user's own key), but "Sign in through Steam" would prove the account is theirs
+[ ] getIdsTitles, getGameAchievementsInfo and getIds in the backend routes still have no error handler
+[ ] decide whether article images should be limited to Steam's hosts (other hosts can see the viewer's IP) - safeUrl in Frontend/lib/steam-bbcode.ts
+
+RELIABILITY
+[ ] Steam rate limiting: an empty cache hit a 420, which drops those friends until a later request succeeds
+    - getPlayersInfo fetches each friend's owned games just to get a name and avatar, removing that from the news path should help
+[x] games whose news can't load (ex: FiveM, Steam answers 403) now show a "try again another time" message, Steam is only asked again after an hour
+[x] OwnedGames now refreshes after 24 hours
+[x] Games records now refresh after 24 hours
+[x] PlayerSummaries is now read first, successes and failures are cached
+[ ] friend web can skip the middle person: gatherConnection returns [idOne, idTwo] when idTwo is in userOneRelationships, even if they were reached through a friend
+[ ] online status in friend web can be up to 24 hours old: give PlayerSummaries a shorter limit, around 5 minutes (isStale in Backend/services/cache.js would need to accept a custom age)
+[x] /friendWeb/getConnection now has an error handler
+
+NEWS PAGE
+[x] games with no news now show "No recent news for <game>"
+[ ] 6 articles have no text once tags are removed, so their cards show only a title - add a fallback blurb
+[x] articles now load when a game is selected, 5 at a time up to 50
+[ ] missing key warning (the "1 Issue" badge), most likely the FriendCapsule list - Player has no id, the backend needs to send one
+[ ] check on screen, not seen rendered yet: [c], [expand], videos, tables, spoilers; also clicking outside the popup to close it
+
+CLEANUP
+[ ] remove debug file writes in circleNewsController.js and services/players.js, delete the .txt files they left in Backend/
+[ ] fix remaining type errors, hidden by ignoreBuildErrors in next.config.mjs - app/page.tsx, app/profile/page.tsx, components/ui/game-card.tsx

@@ -3,6 +3,7 @@ const fs = require("fs");
 const { getGamesInfo } = require("../services/games");
 const { getPlayersInfo } = require("../services/players");
 const { getIds } = require("../services/friends");
+const { isStale, cacheFailure, scopedId } = require("../services/cache");
 const mc = require("mongodb");
 
 const mongo = new mc.MongoClient("mongodb://localhost:27017", {
@@ -12,6 +13,8 @@ const mongo = new mc.MongoClient("mongodb://localhost:27017", {
     deprecationErrors: true,
   },
 }).db("Steam-Stats");
+
+const MAX_NEWS_ARTICLES = 50;
 
 const getNews = (apiKey, steamId) => {
   //map going from gameid -> friend ids of those that played recently
@@ -32,20 +35,21 @@ const getNews = (apiKey, steamId) => {
       return Promise.all(populations).then(() => {
         console.log("got here");
         console.log(JSON.stringify());
-        const newsPromises = [];
-        //create, populate, display all news items
+        const gamePromises = [];
+        //articles aren't included here, the frontend asks for them with getNewsPage once a game is selected
         for (const appid in friendGames) {
-          //push promises for game news
           console.log("pushing promise for " + appid);
-          newsPromises.push(
-            requestInfoNews(apiKey, appid, friendGames[appid], avatars),
+          gamePromises.push(
+            requestGameInfo(apiKey, appid, friendGames[appid], avatars),
           );
         }
 
-        return Promise.all(newsPromises);
+        //games that couldn't be retreived come back as null
+        return Promise.all(gamePromises).then((results) =>
+          results.filter((result) => result !== null),
+        );
       });
-    })
-    .catch((error) => console.log(error));
+    });
 };
 
 //makes a request for all data relating to the friends of the user so we can get their avatars
@@ -57,7 +61,9 @@ const getAvatars = (key, friendsList, avatars) => {
         "getPlayersInfoResult.txt",
         JSON.stringify(res, null, 2),
       );
-      for (const user of res.filter((friend) => friend.image !== null)) {
+      for (const user of res.filter(
+        (friend) => friend !== null && friend.image !== null,
+      )) {
         avatars[user.id] = {
           avatar: user.image,
           name: user.name,
@@ -76,18 +82,44 @@ const getAvatars = (key, friendsList, avatars) => {
 
 //TODO: refactor to take advatage of ability to request multiple games/news stories at once?
 
+//returns one page of a game's articles, in the NewsPage format from the frontend's lib/types.ts
+const getNewsPage = (appid, offset, count) => {
+  return getGameNews(appid).then((articles) => {
+    if (articles === null) {
+      throw new Error("failed to retreive news for app " + appid);
+    }
+    return {
+      news: articles
+        .slice(offset, offset + count)
+        .map(({ gid, url, title, author, contents, date }) => ({
+          gid,
+          url,
+          title,
+          author,
+          contents,
+          //steam gives seconds, the frontend passes this directly to new Date()
+          date: date * 1000,
+        })),
+      hasMore: offset + count < articles.length,
+    };
+  });
+};
+
 const getGameNews = (id) => {
   const news = mongo.collection("News");
   return news.findOne({ _id: id }).then((record) => {
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    let newsArticlesForGame;
-    if (record === null || record.updatedAt < yesterday) {
+    //records with a different cachedCount were saved with fewer or shortened articles
+    if (
+      isStale(record) ||
+      (!record.failedAt && record.cachedCount !== MAX_NEWS_ARTICLES)
+    ) {
       console.log("steam retreival for news from app " + id);
-      newsArticlesForGame = retreiveGameNews(id);
-    } else {
-      newsArticlesForGame = record.news;
+      return retreiveGameNews(id).then(
+        (articles) => articles ?? record?.news ?? null,
+      );
     }
-    return newsArticlesForGame;
+    //a record holding only a cached failure has no news
+    return record.news ?? null;
   });
 };
 
@@ -97,82 +129,74 @@ const retreiveGameNews = (id) => {
     .get(" https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002", {
       params: {
         appid: id,
-        count: 10,
-        maxlength: 500,
+        //the whole limit is stored at once so paging doesn't need more steam requests
+        count: MAX_NEWS_ARTICLES,
+        //0 returns the whole article
+        maxlength: 0,
         feeds: "steam_community_announcements",
       },
     })
     .then((res) => res.data.appnews.newsitems)
     .then((newsRes) => {
-      news.updateOne(
-        { _id: id },
-        {
-          $setOnInsert: {
-            _id: id,
+      news
+        .updateOne(
+          { _id: id },
+          {
+            $setOnInsert: {
+              _id: id,
+            },
+            $set: {
+              news: newsRes,
+              cachedCount: MAX_NEWS_ARTICLES,
+              updatedAt: new Date(),
+            },
+            $unset: { fullContents: "", failedAt: "" },
           },
-          $set: {
-            news: newsRes,
-            updatedAt: new Date(),
-          },
-        },
-        { upsert: true },
-      );
+          { upsert: true },
+        )
+        .catch((error) => console.log(error.message));
       return newsRes;
     })
     .catch((error) => {
       fs.writeFileSync("output.txt", error.message);
+      cacheFailure(news, { _id: id });
       return null;
     });
 };
 
-const requestInfoNews = (key, appid, players, avatars) => {
-  const gameNews = getGameNews(appid, 0);
-  const gameInfo = getGamesInfo(key, [appid]);
+const requestGameInfo = (key, appid, players, avatars) => {
+  return getGamesInfo(key, [appid]).then((gameInfo) => {
+    return mapGameResults(gameInfo, players, avatars, appid);
+  });
+};
 
-  if (gameNews === null || gameInfo === null) {
+//builds the FriendGame object described in the frontend's lib/types.ts
+const mapGameResults = (gameInfo, players, avatars, appid) => {
+  const game = gameInfo[0];
+  if (!game) {
     console.log("failed to retreive " + appid);
     return null;
   }
 
-  return Promise.all([gameInfo, gameNews]).then((res) => {
-    return mapNewsResults(res[0], res[1], players, avatars, appid);
-  });
-};
-
-const mapNewsResults = (gameInfo, gameNews, players, avatars, appid) => {
-  try {
-    const { achievements, ...gameData } = gameInfo[0];
-    const reducedNews = {};
-    reducedNews.game = { ...gameData };
-    reducedNews.news = [];
-    for (const newsArticle of gameNews) {
-      reducedNews.news.push({
-        title: newsArticle.title,
-        author: newsArticle.author,
-        contents: newsArticle.contents,
-        date: newsArticle.date,
-      });
-    }
-    reducedNews.players = [];
-    for (const steamid of players) {
-      reducedNews.players.push(avatars[steamid]);
-    }
-    fs.appendFileSync("reducedNews.txt", JSON.stringify(reducedNews, null, 2));
-    return reducedNews;
-  } catch (error) {
-    console.log(error);
-    return {};
-  }
+  return {
+    game: { id: game.id, name: game.name, image: game.image },
+    //friends without a retreivable profile have no avatars entry
+    players: players
+      .map((steamid) => avatars[steamid])
+      .filter((player) => player !== undefined),
+  };
 };
 
 //get all games that the friend is playing, then update the map containing gameid -> freinds playing ids
 //returns promise for that friend's recently played
+//recently played is cached per api key (see keyScope in cache.js), so a
+//friends-only list read with one user's key isn't shown to another user
 const updatePlayingMap = (key, friend, friendGames) => {
   const rp = mongo.collection("RecentlyPlayed");
+  const _id = scopedId(key, friend);
   //request all recently played games by the friend
-  return rp.findOne({ _id: friend }).then((record) => {
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    if (record === null || record.updatedAt < yesterday) {
+  return rp.findOne({ _id }).then((record) => {
+    if (isStale(record)) {
       console.log("Steam retreival for recently played of " + friend);
       return axios
         .get(
@@ -187,53 +211,49 @@ const updatePlayingMap = (key, friend, friendGames) => {
         )
         .then((response) => response.data.response)
         .then((response) => {
-          if (response.games === undefined) {
-            rp.updateOne(
-              { _id: friend },
-              {
-                $setOnInsert: {
-                  _id: friend,
-                },
-                $set: {
-                  games: [],
-                  updatedAt: new Date(),
-                },
-              },
-              { upsert: true },
-            );
-            return;
-          }
-          for (const game of response.games) {
+          //hidden or empty: steam sends no games
+          const games = response?.games ?? [];
+          for (const game of games) {
             //update map going from gameid -> array of friend ids who have played that game recently
             if (game.appid in friendGames)
-              friendGames[game.appid].push(friend.steamid);
-            else friendGames[game.appid] = [friend.steamid];
+              friendGames[game.appid].push(friend);
+            else friendGames[game.appid] = [friend];
           }
 
           rp.updateOne(
-            { _id: friend },
+            { _id },
             {
               $setOnInsert: {
-                _id: friend,
+                _id,
+                steamId: friend,
               },
               $set: {
-                games: response.games,
+                games: games,
                 updatedAt: new Date(),
               },
+              $unset: { failedAt: "" },
             },
             { upsert: true },
-          );
+          ).catch((error) => console.log(error.message));
         })
-        .catch((error) => fs.writeFileSync("output.txt", error.message));
+        .catch((error) => {
+          fs.writeFileSync("output.txt", error.message);
+          cacheFailure(rp, { _id });
+          //fall back on whatever we have stored
+          for (const game of record?.games ?? []) {
+            if (game.appid in friendGames) friendGames[game.appid].push(friend);
+            else friendGames[game.appid] = [friend];
+          }
+        });
     } else {
-      for (const game of record.games) {
+      //a record holding only a cached failure has no games
+      for (const game of record.games ?? []) {
         //update map going from gameid -> array of friend ids who have played that game recently
-        if (game.appid in friendGames)
-          friendGames[game.appid].push(friend.steamid);
-        else friendGames[game.appid] = [friend.steamid];
+        if (game.appid in friendGames) friendGames[game.appid].push(friend);
+        else friendGames[game.appid] = [friend];
       }
     }
   });
 };
 
-module.exports = { getNews, requestInfoNews };
+module.exports = { getNews, getNewsPage, MAX_NEWS_ARTICLES };

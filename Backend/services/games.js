@@ -1,6 +1,7 @@
 const axios = require("axios");
 const fs = require("fs");
 const mc = require("mongodb");
+const { isStale, cacheFailure, scopedId } = require("./cache");
 
 const mongo = new mc.MongoClient("mongodb://localhost:27017", {
   serverApi: {
@@ -9,6 +10,15 @@ const mongo = new mc.MongoClient("mongodb://localhost:27017", {
     deprecationErrors: true,
   },
 }).db("Steam-Stats");
+
+//asks steam for a player's library with the user's own key
+//resolves to steam's response object; games is missing if the library is hidden
+const requestOwnedGames = (key, id, extraParams = {}) =>
+  axios
+    .get("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/", {
+      params: { key: key, steamid: id, ...extraParams },
+    })
+    .then((response) => response.data.response);
 
 const getGamesInfo = (apiKey, appIds) => {
   const games = mongo.collection("Games");
@@ -19,33 +29,52 @@ const getGamesInfo = (apiKey, appIds) => {
       games
         .findOne({ _id: Number(appId) })
         .then((record) => {
-          if (record === null) {
-            fs.appendFileSync(
-              "attemptedRetreivals.txt",
-              "steam retreival with key " + apiKey + " for app " + appId,
-            );
+          if (isStale(record)) {
+            console.log("steam retreival for app " + appId);
             return retrieveGameInfo(apiKey, appId).then((retreivedGameInfo) => {
-              if (retreivedGameInfo === undefined) return null;
+              //steam request failed, fall back on whatever we have stored
+              if (retreivedGameInfo === undefined) {
+                cacheFailure(games, { _id: Number(appId) });
+                return record;
+              }
               const { id, ...resGame } = retreivedGameInfo;
               const newGame = {
                 _id: id,
                 ...resGame,
               };
-              games.insertOne(newGame);
+              games
+                .updateOne(
+                  { _id: id },
+                  {
+                    $setOnInsert: {
+                      _id: id,
+                    },
+                    $set: {
+                      ...resGame,
+                      updatedAt: new Date(),
+                    },
+                    $unset: { failedAt: "" },
+                  },
+                  { upsert: true },
+                )
+                .catch((e) => console.log(e.message));
 
-              return resGame;
+              return newGame;
             });
           }
           console.log("database retreival");
           return record;
         })
-        .then(({ _id, ...resRecord }) => {
+        .then((record) => {
+          //a record without a name only holds a cached failure
+          if (record === null || record.name === undefined) return null;
+          const { _id, updatedAt, failedAt, ...resRecord } = record;
           return {
             id: _id,
             ...resRecord,
           };
         })
-        .catch((e) => console.log(e)),
+        .catch((e) => console.log(e.message)),
     );
   }
 
@@ -67,10 +96,13 @@ const retrieveGameInfo = (apiKey, appId) => {
           },
         )
         .then((resAch) => {
-          return resAch.data.game.availableGameStats.achievements;
+          //games without achievements come back with no availableGameStats
+          return resAch.data.game?.availableGameStats?.achievements ?? [];
         })
         .then((achievements) =>
-          insertAchivementsPercentage(appId, achievements),
+          achievements.length === 0
+            ? []
+            : insertAchivementsPercentage(appId, achievements),
         )
         .then((achievements) => {
           return {
@@ -84,9 +116,9 @@ const retrieveGameInfo = (apiKey, appId) => {
             publishers: game.publishers,
             achievements: achievements,
           };
-        })
-        .catch((e) => console.log(e));
-    });
+        });
+    })
+    .catch((e) => console.log("failed on app " + appId + ": " + e.message));
 };
 
 const insertAchivementsPercentage = (appId, achievements) => {
@@ -113,26 +145,18 @@ const insertAchivementsPercentage = (appId, achievements) => {
 //if the games list exists and is not old, then use
 //else, retreive games list. Update all games in list <- maybe save for later
 
+//cached per api key (see keyScope in cache.js): a friends-only library read
+//with one user's key is never shown to another user
 const getOwnedGames = (key, id) => {
   const owned = mongo.collection("OwnedGames");
+  const _id = scopedId(key, id);
 
   try {
-    return owned.findOne({ _id: id }).then((record) => {
-      const yesterday = new Date(Date() - 24 * 60 * 60 * 1000);
-      if (record === null || record.lastUpdated < yesterday) {
+    return owned.findOne({ _id }).then((record) => {
+      if (isStale(record)) {
         console.log("steam retreival");
-        return axios
-          .get(
-            "https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/",
-            {
-              params: {
-                key: key,
-                steamid: id,
-                include_appinfo: true,
-              },
-            },
-          )
-          .then((response) => response.data.response.games)
+        return requestOwnedGames(key, id, { include_appinfo: true })
+          .then((response) => response?.games)
           .then((retrievedGames) => {
             const mappedGames =
               retrievedGames === null || retrievedGames === undefined
@@ -147,27 +171,61 @@ const getOwnedGames = (key, id) => {
                       };
                     },
                   );
-            owned.updateOne(
-              { _id: id },
-              {
-                $setOnInsert: {
-                  _id: id,
+            owned
+              .updateOne(
+                { _id },
+                {
+                  $setOnInsert: {
+                    _id,
+                    steamId: id,
+                  },
+                  $set: {
+                    updatedAt: new Date(),
+                    games: mappedGames,
+                  },
+                  $unset: { failedAt: "" },
                 },
-                $set: {
-                  updatedAt: new Date(),
-                  games: mappedGames,
-                },
-              },
-              { upsert: true },
-            );
+                { upsert: true },
+              )
+              .catch((e) => console.log(e.message));
             return mappedGames;
+          })
+          .catch((e) => {
+            //steam request failed, fall back on whatever we have stored
+            console.log("failed on owned games of " + id + ": " + e.message);
+            cacheFailure(owned, { _id });
+            return record?.games ?? [];
           });
       } else {
         console.log("database retreival");
-        return record.games;
+        return record.games ?? [];
       }
     });
   } catch {}
 };
 
-module.exports = { getGamesInfo, getOwnedGames };
+const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+//games the site already has store data for, matched by name; reads only the
+//cache, never steam
+const searchCachedGames = (query, limit) =>
+  mongo
+    .collection("Games")
+    .find(
+      {
+        name: { $regex: escapeRegex(query), $options: "i" },
+      },
+      { projection: { _id: 1, name: 1, image: 1 } },
+    )
+    .limit(limit)
+    .toArray()
+    .then((games) =>
+      games.map(({ _id, name, image }) => ({ id: _id, name, image })),
+    );
+
+module.exports = {
+  getGamesInfo,
+  getOwnedGames,
+  requestOwnedGames,
+  searchCachedGames,
+};

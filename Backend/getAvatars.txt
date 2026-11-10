@@ -1,0 +1,122 @@
+{
+  "76561197990857883": {
+    "avatar": "https://avatars.steamstatic.com/8e89142bc752d77a26738ffd6e742ddc5a1fd487_full.jpg",
+    "name": "EliteLife"
+  },
+  "76561198002038003": {
+    "avatar": "https://avatars.steamstatic.com/3f10a5c8e89e9aa46db78ff7a2a7d257b933a5b0_full.jpg",
+    "name": "MaoZedong"
+  },
+  "76561198033325994": {
+    "avatar": "https://avatars.steamstatic.com/356ec8b4c88e9b27e702cf0b9e57a2ad8b7a5db0_full.jpg",
+    "name": "hypo"
+  },
+  "76561198042239642": {
+    "avatar": "https://avatars.steamstatic.com/853c1cdbf035555ee59f81d07ee686390ede0091_full.jpg",
+    "name": "Schplungy"
+  },
+  "76561198044490905": {
+    "avatar": "https://avatars.steamstatic.com/c0bd9e18b9fc00e2009d1b2e00186ca10f7410b9_full.jpg",
+    "name": "small boat"
+  },
+  "76561198046843883": {
+    "avatar": "https://avatars.steamstatic.com/e76638c9418784d8eb72ad15b953aae3f24dd27b_full.jpg",
+    "name": "Ritz"
+  },
+  "76561198054042424": {
+    "avatar": "https://avatars.steamstatic.com/48fe62c4acd46886e2ac055cd89f2c7769ab4eb6_full.jpg",
+    "name": "BIG SEXY"
+  },
+  "76561198055456108": {
+    "avatar": "https://avatars.steamstatic.com/d4e2e62931629dc5d1f77c34b750da1404f91297_full.jpg",
+    "name": "Scobblestein"
+  },
+  "76561198069525475": {
+    "avatar": "https://avatars.steamstatic.com/f3b40d1e737cf32e69719e6b5d77543971bb9a8c_full.jpg",
+    "name": "Tub Tub"
+  },
+  "76561198079481907": {
+    "avatar": "https://avatars.steamstatic.com/b56984afc552c1c505e08f999e9ead2504bc3255_full.jpg",
+    "name": "Herbert Hoover"
+  },
+  "76561198080034856": {
+    "avatar": "https://avatars.steamstatic.com/41fffb5f377f24e310dff0ebb288937432d33552_full.jpg",
+    "name": "B4c0nBurg3r"
+  },
+  "76561198083079628": {
+    "avatar": "https://avatars.steamstatic.com/d223149d8c0670058b81f58590ee13cae1ebfd43_full.jpg",
+    "name": "Arizonapax"
+  },
+  "76561198090275349": {
+    "avatar": "https://avatars.steamstatic.com/bd8392ed8a9757d900634db5977637c247b81ae2_full.jpg",
+    "name": "ethanzaharoni"
+  },
+  "76561198090916402": {
+    "avatar": "https://avatars.steamstatic.com/38398b9d165c8d004d4f63fcb50ddf536409b92f_full.jpg",
+    "name": "JAX"
+  },
+  "76561198091240440": {
+    "avatar": "https://avatars.steamstatic.com/22be76f4bdde837917e24aafda4a02cc30b752a3_full.jpg",
+    "name": "jbae"
+  },
+  "76561198092669020": {
+    "avatar": "https://avatars.steamstatic.com/8f53898d57b92706a15decfdf04d8ab3e5f380ed_full.jpg",
+    "name": "Mal"
+  },
+  "76561198092786649": {
+    "avatar": "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg",
+    "name": "DeadlySoldier65"
+  },
+  "76561198093944367": {
+    "avatar": "https://avatars.steamstatic.com/16a71f8c8b21f684dcd0d22cf01d6e213eb818d4_full.jpg",
+    "name": "Little Fat Kid"
+  },
+  "76561198094665516": {
+    "avatar": "https://avatars.steamstatic.com/68f8e463100fccc4052dea29fd45354aa5bcb182_full.jpg",
+    "name": "Fuccboi Supreme"
+  },
+  "76561198102124701": {
+    "avatar": "https://avatars.steamstatic.com/21190f08de3346b33f3435d8ecfeef77fbda23a2_full.jpg",
+    "name": "Wheat-Thin"
+  },
+  "76561198103197340": {
+    "avatar": "https://avatars.steamstatic.com/5c65e857dacc2c79d2e35e2ea1436ed30c415841_full.jpg",
+    "name": "DarthMasterBatman"
+  },
+  "76561198157103199": {
+    "avatar": "https://avatars.steamstatic.com/d8d35761bb9b0fd8dd51123d527da115f12fe8bf_full.jpg",
+    "name": "hex: big tits"
+  },
+  "76561198177715286": {
+    "avatar": "https://avatars.steamstatic.com/414176b4894f0fdad57bda73b81b3ed3f5b14f3d_full.jpg",
+    "name": "Volrajas"
+  },
+  "76561198241817454": {
+    "avatar": "https://avatars.steamstatic.com/1f15076c51834abfef23d073e8b4cc3d82accbc3_full.jpg",
+    "name": "heck"
+  },
+  "76561198271921759": {
+    "avatar": "https://avatars.steamstatic.com/cb7d8969adb1366e08276045f4cef4857bf7df8e_full.jpg",
+    "name": "snatchclap"
+  },
+  "76561198273195735": {
+    "avatar": "https://avatars.steamstatic.com/e96d07b6fc39ea38ded5f7e6bd798a0447521be8_full.jpg",
+    "name": "DEXTER MORGAN"
+  },
+  "76561198763151263": {
+    "avatar": "https://avatars.steamstatic.com/283d23e9dd24e254596a41ffdfa31b370651cc5b_full.jpg",
+    "name": "poison skewer"
+  },
+  "76561199130610599": {
+    "avatar": "https://avatars.steamstatic.com/f8999bd943782009ddcf138afe10f5f4c44a53e5_full.jpg",
+    "name": "mredding"
+  },
+  "76561199182124232": {
+    "avatar": "https://avatars.steamstatic.com/3ade07de337a2a183b3d99d7d9e49ead0bf467f1_full.jpg",
+    "name": "rxdswqtchxn"
+  },
+  "76561199245603282": {
+    "avatar": "https://avatars.steamstatic.com/a98562f84af9f58b48c4d5b69f0992900510e7e3_full.jpg",
+    "name": "gray"
+  }
+}

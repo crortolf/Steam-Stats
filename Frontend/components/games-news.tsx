@@ -1,33 +1,93 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
 import { Clock, Newspaper } from "lucide-react";
+import {
+  SortChips,
+  type SortDirection,
+  type SortOption,
+} from "@/components/sort-chips";
 import { GameCapsule } from "@/components/game-capsule";
+import { GameNewsFeed } from "@/components/game-news-feed";
 import FriendCapsule from "./friend-capsule";
-import { NewsItem, Player, GameNews, Game } from "../lib/types";
-import { cn } from "@/lib/utils";
+import { NewsItem, FriendGame } from "../lib/types";
 import axios from "axios";
+import { useAuth } from "@/lib/auth";
 
-//TODO: replace with persistant user data
-const TEMP_USERDATA = "76561198045843433";
+type SortKey = "title" | "friends";
+
+const SORT_OPTIONS: readonly SortOption<SortKey>[] = [
+  { key: "title", label: "Title" },
+  { key: "friends", label: "Friends" },
+];
+
+const describeSort = (key: SortKey, direction: SortDirection) =>
+  key === "title"
+    ? direction === "asc"
+      ? "A to Z"
+      : "Z to A"
+    : direction === "asc"
+      ? "Fewest friends first"
+      : "Most friends first";
+
+const titleCollator = new Intl.Collator(undefined, {
+  sensitivity: "base",
+  numeric: true,
+});
+const byTitle = (a: FriendGame, b: FriendGame) =>
+  titleCollator.compare(a.game.name, b.game.name);
+const friendCount = (g: FriendGame) =>
+  g.players.filter((p) => p !== null).length;
+
+// Direction each sort starts in when first picked: A→Z, most friends first.
+const defaultDirection: Record<SortKey, SortDirection> = {
+  title: "asc",
+  friends: "desc",
+};
 
 export function GamesNews() {
-  const [gamesNews, setGamesNews] = useState<GameNews[]>([]);
+  //RequireSteamKey only renders this once the user has a steam id
+  const steamId = useAuth().user?.steamId ?? null;
+  const [gamesNews, setGamesNews] = useState<FriendGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedGame, setSelectedGame] = useState<GameNews | null>(null);
+  const [selectedGame, setSelectedGame] = useState<FriendGame | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>("friends");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+
+  const sortedGames = useMemo(() => {
+    const sign = sortDirection === "asc" ? 1 : -1;
+    return [...gamesNews].sort((a, b) =>
+      sortKey === "title"
+        ? sign * byTitle(a, b)
+        : // games with the same number of friends stay in A→Z order
+          sign * (friendCount(a) - friendCount(b)) || byTitle(a, b),
+    );
+  }, [gamesNews, sortKey, sortDirection]);
+
+  // Picking the active sort flips its direction; picking the other one
+  // switches to it in its natural direction.
+  const chooseSort = (key: SortKey) => {
+    if (key === sortKey) {
+      setSortDirection((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection(defaultDirection[key]);
+    }
+  };
 
   console.log(gamesNews);
 
   useEffect(() => {
+    if (steamId === null) return;
     const controller = new AbortController();
 
     //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
     function load() {
       axios
-        .get<GameNews[]>("http://localhost:5011/circleNews/getNews", {
-          params: { id: TEMP_USERDATA },
+        .get<FriendGame[]>("http://localhost:5011/circleNews/getNews", {
+          params: { id: steamId },
+          withCredentials: true,
           signal: controller.signal,
         })
         .then((res) => {
@@ -46,7 +106,7 @@ export function GamesNews() {
 
     load();
     return () => controller.abort(); // cleanup
-  }, []);
+  }, [steamId]);
 
   useEffect(() => {
     console.log(selectedGame);
@@ -60,12 +120,22 @@ export function GamesNews() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_1fr]">
       {/* Recently played by friends */}
-      <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          <Clock className="size-4" /> Recently played by friends
-        </h2>
+      <section className="min-w-0">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            <Clock className="size-4" /> Recently played by friends
+          </h2>
+          <SortChips
+            options={SORT_OPTIONS}
+            activeKey={sortKey}
+            direction={sortDirection}
+            onSelect={chooseSort}
+            describe={describeSort}
+            ariaLabel="Sort games"
+          />
+        </div>
         <ul className="flex flex-col gap-3 h-170 overflow-y-scroll">
-          {gamesNews.map((p) => {
+          {sortedGames.map((p) => {
             return (
               <li
                 key={`${p.game.id}`}
@@ -103,81 +173,16 @@ export function GamesNews() {
       </section>
 
       {/* News feed */}
-      <section>
+      <section className="min-w-0">
         <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           <Newspaper className="size-4" /> Game news
         </h2>
-        {selectedGame === null || selectedGame.news.length === 0 ? (
+        {selectedGame === null ? (
           <div>Select a game for News</div>
         ) : (
-          <ul className="gap-3 overflow-y-scroll h-170">
-            {selectedGame.news.map((n) => {
-              return (
-                <li
-                  //key={n}
-                  className="overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-primary/40"
-                >
-                  <article className="flex flex-col">
-                    <div className="relative aspect-[460/215] w-full">
-                      <Image
-                        src={selectedGame.game.image || "/placeholder.svg"}
-                        alt=""
-                        fill
-                        sizes="(max-width: 1024px) 100vw, 480px"
-                        className="object-cover"
-                      />
-                      <span className="absolute left-2 top-2 rounded bg-popover/90 px-2 py-0.5 text-xs font-medium text-foreground backdrop-blur">
-                        {selectedGame.game.name}
-                      </span>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span className="font-medium text-primary">
-                          Author: {n.author}
-                        </span>
-                        <span aria-hidden>·</span>
-
-                        <time>{new Date(n.date).toLocaleString()}</time>
-                      </div>
-                      <h3 className="mt-1 text-pretty font-semibold leading-snug text-foreground">
-                        {n.title}
-                      </h3>
-                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                        {n.contents}
-                      </p>
-                    </div>
-                  </article>
-                </li>
-              );
-            })}
-          </ul>
+          <GameNewsFeed key={selectedGame.game.id} game={selectedGame.game} />
         )}
       </section>
     </div>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
-        active
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground",
-      )}
-    >
-      {children}
-    </button>
   );
 }

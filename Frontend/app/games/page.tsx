@@ -1,4 +1,5 @@
 import { GamesNews } from '@/components/games-news'
+import { RequireSteamKey } from '@/components/require-steam-key'
 
 export default function GamesPage() {
   return (
@@ -11,7 +12,9 @@ export default function GamesPage() {
           What your friends are playing right now, paired with the latest news for each title.
         </p>
       </header>
-      <GamesNews />
+      <RequireSteamKey>
+        <GamesNews />
+      </RequireSteamKey>
     </main>
   )
 }

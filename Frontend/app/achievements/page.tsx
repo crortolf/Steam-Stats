@@ -1,4 +1,5 @@
 import { AchievementsView } from '@/components/achievements-view'
+import { RequireSteamKey } from '@/components/require-steam-key'
 
 export default function AchievementsPage() {
   return (
@@ -12,7 +13,9 @@ export default function AchievementsPage() {
           friends.
         </p>
       </header>
-      <AchievementsView />
+      <RequireSteamKey>
+        <AchievementsView />
+      </RequireSteamKey>
     </main>
   )
 }

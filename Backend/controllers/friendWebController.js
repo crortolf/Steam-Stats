@@ -1,59 +1,59 @@
-const axios = require("axios");
-const myApiKey = "52852E7C5F7125BC5207C73C9BFC5423";
-//const mySteamID = "76561198045843433";
+const { getIds, getFriendSince } = require("../services/friends");
+const { retrievePlayerSummaries } = require("../services/players");
 
-const getFriends = async (steamid) => {
-  const friendsListResponse = await axios.get(
-    "https://api.steampowered.com/ISteamUser/GetFriendList/v0001/",
-    {
-      params: {
-        key: myApiKey,
-        steamId: steamid,
-      },
-    },
-  );
+const getFriends = async (key, steamid) => {
+  const friends = await getIds(key, steamid);
 
-  const userData = axios.get(
-    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/",
-    {
-      params: {
-        key: myApiKey,
-        steamids: steamid,
-      },
-    },
-  );
+  const userData = retrievePlayerSummaries(key, [steamid]);
+  const friendsData = retrievePlayerSummaries(key, friends);
 
-  const friends = friendsListResponse.data.friendslist.friends.map(
-    (friend) => friend.steamid,
-  );
+  const mutuals = findMutualFriends(key, friends);
 
-  const friendsData = axios.get(
-    "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/",
-    {
-      params: {
-        key: myApiKey,
-        steamids: friends.join(","),
-      },
-    },
-  );
-
-  //return friendsData.data.response.players.map((user) => convertUserData(user));
-  return Promise.all([userData, friendsData]).then(
-    ([userResponse, friendsResponse]) => {
+  return Promise.all([userData, friendsData, mutuals]).then(
+    ([userPlayers, friendPlayers, mutualMap]) => {
       const circle = {
-        user: convertUserData(userResponse.data.response.players[0]),
-        friends: friendsResponse.data.response.players.map((user) =>
-          convertUserData(user),
-        ),
+        user: convertUserData(userPlayers[0]),
+        friends: friendPlayers.map((user) => convertUserData(user)),
       };
       circle.user.mutualFriendIds = [];
-      circle.friends.forEach((f) => (f.mutualFrriendIds = []));
+      circle.friends.forEach(
+        (f) => (f.mutualFriendIds = [...(mutualMap.get(f.steamid) ?? [])]),
+      );
       return circle;
     },
   );
 };
 
-const findConnection = async (idOne, idTwo) => {
+// For each of the user's friends, find which of the user's other friends they
+// are also friends with. Friendship is symmetric, so a link found from either
+// side counts (this covers friends whose own list is private).
+const findMutualFriends = async (key, friendIds, concurrency = 8) => {
+  const friendSet = new Set(friendIds);
+  const mutualMap = new Map(friendIds.map((id) => [id, new Set()]));
+
+  let next = 0;
+  const worker = async () => {
+    while (next < friendIds.length) {
+      const id = friendIds[next++];
+      const theirFriends = await getIds(key, id).catch((e) => {
+        console.error("mutuals for " + id + ": " + e.message);
+        return [];
+      });
+      for (const other of theirFriends) {
+        if (other === id || !friendSet.has(other)) continue;
+        mutualMap.get(id).add(other);
+        mutualMap.get(other).add(id);
+      }
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, friendIds.length) }, worker),
+  );
+  return mutualMap;
+};
+
+const findConnection = async (key, idOne, idTwo) => {
   console.log(idOne + " " + idTwo);
   if (!idOne || !idTwo) throw new Error("Please enter both Steam IDs.");
 
@@ -64,6 +64,7 @@ const findConnection = async (idOne, idTwo) => {
   let connectionString;
 
   const userOneSingleDegree = await iterateFriendsList(
+    key,
     [idOne],
     true,
     userOneRelationships,
@@ -75,9 +76,10 @@ const findConnection = async (idOne, idTwo) => {
     userOneRelationships,
     userTwoRelationships,
   );
-  if (connectionString !== false) return collectUserInfo(connectionString);
+  if (connectionString !== false) return collectUserInfo(key, connectionString);
 
   const userTwoSingleDegree = await iterateFriendsList(
+    key,
     [idTwo],
     false,
     userOneRelationships,
@@ -89,9 +91,10 @@ const findConnection = async (idOne, idTwo) => {
     userOneRelationships,
     userTwoRelationships,
   );
-  if (connectionString !== false) return collectUserInfo(connectionString);
+  if (connectionString !== false) return collectUserInfo(key, connectionString);
 
   const userOneDoubleDegree = await iterateFriendsList(
+    key,
     userOneSingleDegree,
     true,
     userOneRelationships,
@@ -103,9 +106,10 @@ const findConnection = async (idOne, idTwo) => {
     userOneRelationships,
     userTwoRelationships,
   );
-  if (connectionString !== false) return collectUserInfo(connectionString);
+  if (connectionString !== false) return collectUserInfo(key, connectionString);
 
   const userTwoDoubleDegree = await iterateFriendsList(
+    key,
     userTwoSingleDegree,
     false,
     userOneRelationships,
@@ -117,24 +121,17 @@ const findConnection = async (idOne, idTwo) => {
     userOneRelationships,
     userTwoRelationships,
   );
-  if (connectionString !== false) return collectUserInfo(connectionString);
+  if (connectionString !== false) return collectUserInfo(key, connectionString);
 
   return { result: "no relation" };
 };
 
-const collectUserInfo = (orderedUserCodes) => {
-  return axios
-    .get("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/", {
-      params: {
-        key: myApiKey,
-        steamIds: orderedUserCodes.join(","),
-      },
-    })
-    .then((result) => result.data.response.players)
+const collectUserInfo = (key, orderedUserCodes) => {
+  return retrievePlayerSummaries(key, orderedUserCodes)
     .then((unorderedUserData) => {
       const orderedUserData = [];
       for (let i = 0; i < orderedUserCodes.length; i++) {
-        for (let j = 0; j < orderedUserCodes.length; j++) {
+        for (let j = 0; j < unorderedUserData.length; j++) {
           if (orderedUserCodes[i] === unorderedUserData[j].steamid) {
             orderedUserData.push(unorderedUserData[j]);
             j = 10;
@@ -144,7 +141,62 @@ const collectUserInfo = (orderedUserCodes) => {
 
       return orderedUserData.map(convertUserData);
     })
-    .catch((e) => console.error(e));
+    .catch((e) => console.error(e.message));
+};
+
+//player card data is refreshed from steam once the cached copy is 5 minutes old
+const PLAYER_CARD_MAX_AGE_MS = 5 * 60 * 1000;
+
+//steam reports times as unix seconds; convert to ISO strings (or null if hidden)
+const unixToIso = (seconds) =>
+  typeof seconds === "number" && seconds > 0
+    ? new Date(seconds * 1000).toISOString()
+    : null;
+
+//steam app ids fit in 32 bits; larger gameids are non-steam shortcuts or mods
+//that have no store page
+const toStoreAppId = (gameid) => {
+  const n = Number(gameid);
+  return Number.isInteger(n) && n > 0 && n < 2 ** 32 ? n : null;
+};
+
+//friendOf: optional id of the viewing user, used to look up how long the two
+//have been friends
+const getPlayerCard = async (key, steamid, friendOf) => {
+  if (!steamid) throw new Error("Please provide a Steam ID.");
+  const [[summary], friendSince] = await Promise.all([
+    retrievePlayerSummaries(key, [steamid], {
+      maxAgeMs: PLAYER_CARD_MAX_AGE_MS,
+      withUpdatedAt: true,
+    }),
+    friendOf && friendOf !== steamid
+      ? getFriendSince(key, friendOf, steamid).catch((e) => {
+          console.log("friend since lookup failed: " + e.message);
+          return null;
+        })
+      : null,
+  ]);
+  if (!summary) return null;
+
+  return {
+    ...convertUserData(summary),
+    realName: summary.realname ?? null,
+    profileUrl: summary.profileurl ?? null,
+    countryCode: summary.loccountrycode ?? null,
+    //3 = public; private profiles hide most fields, including timecreated
+    isPublic: summary.communityvisibilitystate === 3,
+    currentGame: summary.gameextrainfo ?? null,
+    //only set when the current game has a steam store page
+    currentGameAppId: summary.gameextrainfo
+      ? toStoreAppId(summary.gameid)
+      : null,
+    friendSince: unixToIso(friendSince),
+    lastLogoff: unixToIso(summary.lastlogoff),
+    timeCreated: unixToIso(summary.timecreated),
+    fetchedAt: summary.updatedAt
+      ? new Date(summary.updatedAt).toISOString()
+      : new Date().toISOString(),
+  };
 };
 
 //convert returned api userdata into a form we want to display
@@ -169,6 +221,7 @@ const statusMap = {
 
 //function used to iterate through a list of friends to retrieve their friends
 const iterateFriendsList = async (
+  key,
   friendsList,
   userOne,
   userOneRelationships,
@@ -179,34 +232,19 @@ const iterateFriendsList = async (
 
   for (const friendCode of friendsList) {
     requests.push(
-      axios
-        .get("https://api.steampowered.com/ISteamUser/GetFriendList/v0001/", {
-          params: {
-            key: myApiKey,
-            steamid: friendCode,
-            relationship: "friend",
-          },
-        })
-        .then((response) => {
-          if (
-            !response.data ||
-            !response.data.friendslist ||
-            !Array.isArray(response.data.friendslist.friends)
-          ) {
-            return;
-          }
-
-          for (const secondaryFriend of response.data.friendslist.friends) {
+      getIds(key, friendCode)
+        .then((secondaryFriends) => {
+          for (const secondaryFriend of secondaryFriends) {
             const targetMap = userOne
               ? userOneRelationships
               : userTwoRelationships;
-            if (!(secondaryFriend.steamid in targetMap)) {
-              targetMap[secondaryFriend.steamid] = friendCode;
-              newList.push(secondaryFriend.steamid);
+            if (!(secondaryFriend in targetMap)) {
+              targetMap[secondaryFriend] = friendCode;
+              newList.push(secondaryFriend);
             }
           }
         })
-        .catch((e) => console.error(e)),
+        .catch((e) => console.error(e.message)),
     );
   }
 
@@ -263,4 +301,4 @@ const gatherConnection = (
   return false;
 };
 
-module.exports = { findConnection, getFriends };
+module.exports = { findConnection, getFriends, getPlayerCard };

@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import axios from "axios";
 import { TotalAchievePercent } from "./ui/total-achieve-percent";
 import { AchievementsPane } from "./achievements-pane";
+import { useAuth } from "@/lib/auth";
 
 export const per = (a: SumAchievementData) => {
   return a.totalAchieves > 0
@@ -28,6 +29,8 @@ export const per = (a: SumAchievementData) => {
 };
 
 export function AchievementsView() {
+  //RequireSteamKey only renders this once the user has a steam id
+  const steamId = useAuth().user?.steamId ?? null;
   const [selectedGame, setSelectedGame] = useState<string[] | null>(null);
   const [games, setGames] = useState<string[][] | null>(null);
   const [achievementsData, setAchievementsData] =
@@ -40,6 +43,7 @@ export function AchievementsView() {
   );
 
   useEffect(() => {
+    if (steamId === null) return;
     const controller = new AbortController();
 
     //TODO: finish loading api data into react frontend for viewing in console, then replace fake data
@@ -47,9 +51,9 @@ export function AchievementsView() {
       axios
         .get("http://localhost:5011/achievements/getIdsTitles/", {
           params: {
-            key: process.env.NEXT_PUBLIC_API_KEY,
-            id: process.env.NEXT_PUBLIC_CF_ID,
+            id: steamId,
           },
+          withCredentials: true,
           signal: controller.signal,
         })
         .then((res) => {
@@ -73,10 +77,10 @@ export function AchievementsView() {
 
     load();
     return () => controller.abort();
-  }, []);
+  }, [steamId]);
 
   useEffect(() => {
-    if (!selectedGame) return;
+    if (!selectedGame || steamId === null) return;
 
     const controller = new AbortController();
 
@@ -86,10 +90,10 @@ export function AchievementsView() {
         axios
           .get("http://localhost:5011/achievements/getAchievements/", {
             params: {
-              apiKey: process.env.NEXT_PUBLIC_API_KEY,
               appId: selectedGame[0],
-              steamId: process.env.NEXT_PUBLIC_CF_ID,
+              steamId: steamId,
             },
+            withCredentials: true,
             signal: controller.signal,
           })
           .then((res) => {
@@ -109,7 +113,7 @@ export function AchievementsView() {
 
     load();
     return () => controller.abort();
-  }, [selectedGame]);
+  }, [selectedGame, steamId]);
 
   // const stats = useMemo(() => {
   //   const total = list.length;
@@ -148,19 +152,25 @@ export function AchievementsView() {
   console.log(achievementsData);
 
   if (gamesLoading) return <div>Loading...</div>;
-  if (achievementsError) return <div>Achievements error encountered</div>;
-  if (gamesError) return <div>Games error encountered</div>;
 
+  // Errors are shown under the selector rather than replacing it, so another
+  // game can still be picked after one fails to load.
   return (
     <div>
       {/*  game selector */}
       <Select
-        value={selectedGame?.[1]}
+        // null (not undefined) means "nothing selected", so the Select stays
+        // controlled from the first render instead of switching later
+        value={selectedGame?.[1] ?? null}
         onValueChange={(title) => {
           const newSelectedGame =
             games?.find((game) => game[1] === title) ?? null;
           if (newSelectedGame !== null) {
             setAchievementsLoading(true);
+            // Drop the previous game's error and data so neither shows for
+            // the newly selected game.
+            setAchievementsError(null);
+            setAchievementsData(null);
             setSelectedGame(newSelectedGame);
           }
         }}
@@ -176,6 +186,17 @@ export function AchievementsView() {
           ))}
         </SelectContent>
       </Select>
+      {gamesError && (
+        <p role="alert" className="mt-3 text-sm text-destructive">
+          {gamesError}. Try reloading the page.
+        </p>
+      )}
+      {achievementsError && selectedGame && (
+        <p role="alert" className="mt-3 text-sm text-destructive">
+          {achievementsError} for {selectedGame[1]}. Choose another game, or
+          reload the page to try again.
+        </p>
+      )}
       {!achievementsLoading && achievementsData && selectedGame && (
         <div>
           <br />

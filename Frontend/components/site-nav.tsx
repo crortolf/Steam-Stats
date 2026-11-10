@@ -5,20 +5,21 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { currentUser } from "@/lib/mock-data";
-import { StatusDot } from "@/components/status-dot";
 
 const links = [
   { href: "/network", label: "Friend Network" },
   { href: "/games", label: "Games & News" },
   { href: "/achievements", label: "Achievements" },
+  { href: "/recommendations", label: "Recommendations" },
   { href: "/profile", label: "Profile" },
 ];
 
 export function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { user, loading, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-popover/95 backdrop-blur supports-[backdrop-filter]:bg-popover/80">
@@ -60,27 +61,30 @@ export function SiteNav() {
           })}
         </nav>
 
-        <Link
-          href="/profile"
-          className="ml-auto hidden items-center gap-2 rounded px-2 py-1 hover:bg-secondary/60 md:flex"
-        >
-          <div className="relative">
-            <Image
-              src={currentUser.avatar || "/placeholder.svg"}
-              alt=""
-              width={28}
-              height={28}
-              className="rounded"
-            />
-            <StatusDot
-              status={currentUser.status}
-              className="absolute -bottom-0.5 -right-0.5 ring-2 ring-popover"
-            />
-          </div>
-          <span className="text-sm font-medium text-foreground">
-            {currentUser.name}
-          </span>
-        </Link>
+        <div className="ml-auto hidden min-w-0 items-center gap-2 md:flex">
+          {user !== null && (
+            <>
+              <span className="truncate text-sm text-muted-foreground">
+                {user.email}
+              </span>
+              <button
+                type="button"
+                onClick={signOut}
+                className="shrink-0 rounded px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+              >
+                Sign out
+              </button>
+            </>
+          )}
+          {!loading && user === null && (
+            <Link
+              href="/sign-in"
+              className="rounded px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+            >
+              Sign in
+            </Link>
+          )}
+        </div>
 
         <button
           type="button"
@@ -116,6 +120,27 @@ export function SiteNav() {
               </Link>
             );
           })}
+          {user !== null && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                signOut();
+              }}
+              className="block w-full rounded px-3 py-2 text-left text-sm font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+            >
+              Sign out
+            </button>
+          )}
+          {!loading && user === null && (
+            <Link
+              href="/sign-in"
+              onClick={() => setOpen(false)}
+              className="block rounded px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+            >
+              Sign in
+            </Link>
+          )}
         </nav>
       )}
     </header>

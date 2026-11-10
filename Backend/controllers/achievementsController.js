@@ -3,6 +3,7 @@ const mc = require("mongodb");
 const fs = require("fs");
 const { getOwnedGames, getGamesInfo } = require("../services/games");
 const { getIds } = require("../services/friends");
+const { isStale, cacheFailure, keyScope } = require("../services/cache");
 
 const mongo = new mc.MongoClient("mongodb://localhost:27017", {
   serverApi: {
@@ -23,19 +24,6 @@ const getAchievements = (apiKey, appId, steamId) => {
       return owners.map((owner) => spAchievementData(apiKey, appId, owner));
     });
   });
-
-  // console.log(friendsData);
-  // friendsData.then((results) => {
-  //   console.log(results);
-  //   Promise.all(results).then((resolutions) => console.log(resolutions));
-  // });
-
-  // return new Promise((resolve) => setTimeout(() => resolve(true), 500));
-
-  // return Promise.all([playerData, globalData, friendsData]).then((results) => {
-  //   console.log(results);
-  //   return {};
-  // });
 
   return friendsData.then((friendPromises) => {
     return Promise.all([playerData, globalData, ...friendPromises]).then(
@@ -108,30 +96,39 @@ const getAchievements = (apiKey, appId, steamId) => {
   });
 };
 
+//a player's achievements are cached per api key (see keyScope in cache.js), so
+//friends-only achievements read with one user's key aren't shown to others
 const spAchievementData = (key, app, user) => {
   const pwg = mongo.collection("PlayerWithGame");
 
-  return pwg.findOne({ steamId: user, appId: app }).then((record) => {
-    let achievements;
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    if (record === null || record.updatedAt < yesterday) {
-      console.log("steam retrieval for app " + app + " and user " + user);
-      achievements = retrieveAchievements(key, app, user);
-    } else {
-      console.log("database retreival");
-      achievements = {
-        achievements: record.achievements,
-        totalAchieved: record.totalAchieved,
-      };
-    }
+  return pwg
+    .findOne({ viewer: keyScope(key), steamId: user, appId: app })
+    .then((record) => {
+      //a record holding only a cached failure has no achievements yet
+      const stored =
+        record?.achievements === undefined
+          ? null
+          : {
+              achievements: record.achievements,
+              totalAchieved: record.totalAchieved,
+            };
 
-    return achievements;
-  });
+      if (isStale(record)) {
+        console.log("steam retrieval for app " + app + " and user " + user);
+        return retrieveAchievements(key, app, user).then(
+          (achievements) => achievements ?? stored,
+        );
+      }
+
+      console.log("database retreival");
+      return stored;
+    });
 };
 
 const retrieveAchievements = (apiKey, appId, steamId) => {
   const achievements = {};
   const pwg = mongo.collection("PlayerWithGame");
+  const filter = { viewer: keyScope(apiKey), steamId: steamId, appId: appId };
 
   return axios
     .get(
@@ -164,38 +161,22 @@ const retrieveAchievements = (apiKey, appId, steamId) => {
         });
       }
       pwg.updateOne(
-        { steamId: steamId, appId: appId },
+        filter,
         {
-          $setOnInsert: {
-            steamId: steamId,
-            appId: appId,
-          },
+          $setOnInsert: filter,
           $set: {
             achievements: achievements.achievements,
             totalAchieved: achievements.totalAchieved,
             updatedAt: new Date(),
           },
+          $unset: { failedAt: "" },
         },
         { upsert: true },
-      );
+      ).catch((error) => console.log(error.message));
       return achievements;
     })
     .catch((e) => {
-      pwg.updateOne(
-        { steamId: steamId, appId: appId },
-        {
-          $setOnInsert: {
-            steamId: steamId,
-            appId: appId,
-          },
-          $set: {
-            achievements: null,
-            totalAchieved: null,
-            updatedAt: new Date(),
-          },
-        },
-        { upsert: true },
-      );
+      cacheFailure(pwg, filter);
       return null;
     });
 };
@@ -207,4 +188,4 @@ const doesFriendOwn = (key, friend, app) => {
   });
 };
 
-module.exports = { getAchievements, doesFriendOwn };
+module.exports = { getAchievements, doesFriendOwn, spAchievementData };

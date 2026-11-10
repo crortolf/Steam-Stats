@@ -1,4 +1,5 @@
 import { FriendNetwork } from '@/components/friend-network'
+import { RequireSteamKey } from '@/components/require-steam-key'
 
 export default function NetworkPage() {
   return (
@@ -12,7 +13,9 @@ export default function NetworkPage() {
           highlight, click to inspect.
         </p>
       </header>
-      <FriendNetwork />
+      <RequireSteamKey>
+        <FriendNetwork />
+      </RequireSteamKey>
     </main>
   )
 }

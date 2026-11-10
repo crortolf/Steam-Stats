@@ -2,16 +2,9 @@
 
 import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
-import Image from "next/image";
-import { MapPin, Users, Gamepad2 } from "lucide-react";
-import {
-  getGame,
-  getFriend,
-  statusLabel,
-  type FriendStatus,
-} from "@/lib/mock-data";
-import { StatusDot } from "@/components/status-dot";
-import { Badge } from "@/components/ui/badge";
+import type { FriendStatus } from "@/lib/mock-data";
+import { PlayerCard } from "@/components/player-card";
+import { useAuth } from "@/lib/auth";
 
 type Node = {
   steamid: string;
@@ -34,10 +27,50 @@ type UserData = {
 
 type Edge = { a: string; b: string };
 
-const W = 800;
-const H = 620;
-const CX = W / 2;
-const CY = H / 2;
+// ---- Concentric ring layout ----
+// Each portrait (plus its name label) is bounded by a "footprint" circle
+// centred on the portrait. Rings and slots are spaced so no two footprints
+// can ever intersect, which guarantees portraits and labels never overlap.
+const NODE_R = 26;
+const USER_R = 42;
+const NODE_LABEL_CHARS = 11; // ~76px wide at 12px bold
+const USER_LABEL_CHARS = 14; // ~126px wide at 16px bold
+// Distance from a node's centre to the far corner of its label box.
+const NODE_FOOTPRINT = 62;
+const USER_FOOTPRINT = 92;
+const GAP = 6;
+// Minimum centre-to-centre distance between any two friend nodes.
+const MIN_SPACING = NODE_FOOTPRINT * 2 + GAP;
+const FIRST_RING = USER_FOOTPRINT + NODE_FOOTPRINT + GAP;
+const MARGIN = 12;
+
+/** How many nodes fit on a ring of this radius with chord >= MIN_SPACING. */
+function ringCapacity(radius: number) {
+  return Math.max(
+    1,
+    Math.floor(Math.PI / Math.asin(Math.min(1, MIN_SPACING / (2 * radius)))),
+  );
+}
+
+/** Split `count` nodes into rings, filling inner rings first. */
+function buildRings(count: number) {
+  const rings: { radius: number; count: number }[] = [];
+  let remaining = count;
+  let radius = FIRST_RING;
+  while (remaining > 0) {
+    const take = Math.min(remaining, ringCapacity(radius));
+    rings.push({ radius, count: take });
+    remaining -= take;
+    // Rings are MIN_SPACING apart, so nodes on different rings are too.
+    radius += MIN_SPACING;
+  }
+  return rings;
+}
+
+const truncate = (s: string, max: number) =>
+  s.length > max ? `${s.slice(0, max - 1)}…` : s;
+
+const statusOrder = (s: FriendStatus) => (s === "Offline" ? 1 : 0);
 
 const statusStroke: Record<FriendStatus, string> = {
   Online: "var(--status-Online)",
@@ -50,62 +83,91 @@ const statusStroke: Record<FriendStatus, string> = {
 };
 
 export function FriendNetwork() {
+  //RequireSteamKey only renders this once the user has a steam id
+  const steamId = useAuth().user?.steamId ?? null;
   const [hovered, setHovered] = useState<string | null>(null);
-  const [selected, setSelected] = useState<string | null>("u0");
+  const [selected, setSelected] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserData | null>(null);
   const [friends, setFriends] = useState<UserData[] | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
+    if (steamId === null) return;
     console.log("loading");
     try {
       axios
         .get("http://localhost:5011/friendWeb/getFriends/", {
           params: {
-            steamid: "76561198045843433",
+            steamid: steamId,
           },
+          withCredentials: true,
         })
         .then((response) => {
           setCurrentUser(response.data.user);
           setFriends(response.data.friends);
+          // The user starts out selected so their connections are shown.
+          setSelected(response.data.user?.steamid ?? null);
           setLoaded(true);
         });
     } catch (err) {
       console.log(err);
     }
-  }, []);
+  }, [steamId]);
+
+  const rings = useMemo(() => buildRings(friends?.length ?? 0), [friends]);
+
+  // Square canvas just big enough for the outermost ring.
+  const outerRadius = rings.length
+    ? rings[rings.length - 1].radius + NODE_FOOTPRINT
+    : USER_FOOTPRINT;
+  const SIZE = Math.ceil((outerRadius + MARGIN) * 2);
+  const CX = SIZE / 2;
+  const CY = SIZE / 2;
 
   const nodes = useMemo<Node[]>(() => {
-    if (loaded && currentUser !== null && friends !== null) {
-      const radius = 235;
-      const friendNodes = friends.map((f, i) => {
-        const angle = (i / friends.length) * Math.PI * 2 - Math.PI / 2;
-        return {
+    if (currentUser === null || friends === null) return [];
+
+    // Online friends go on the inner rings.
+    const ordered = [...friends].sort(
+      (a, b) => statusOrder(a.status) - statusOrder(b.status),
+    );
+
+    const friendNodes: Node[] = [];
+    let i = 0;
+    rings.forEach((ring, ringIndex) => {
+      const step = (Math.PI * 2) / ring.count;
+      // Stagger alternate rings so portraits don't line up in spokes.
+      const offset = -Math.PI / 2 + (ringIndex % 2 ? step / 2 : 0);
+      for (let slot = 0; slot < ring.count; slot++, i++) {
+        const f = ordered[i];
+        const angle = offset + slot * step;
+        friendNodes.push({
           steamid: f.steamid,
           name: f.username,
           avatar: f.avatar,
           status: f.status,
-          x: CX + Math.cos(angle) * radius,
-          y: CY + Math.sin(angle) * radius,
-          r: 30,
+          x: CX + Math.cos(angle) * ring.radius,
+          y: CY + Math.sin(angle) * ring.radius,
+          r: NODE_R,
           isUser: false,
-        };
-      });
-      return [
-        {
-          steamid: currentUser.steamid,
-          name: currentUser.username,
-          avatar: currentUser.avatar,
-          status: currentUser.status,
-          x: CX,
-          y: CY,
-          r: 42,
-          isUser: true,
-        },
-        ...friendNodes,
-      ];
-    } else return [];
-  }, [loaded]);
+        });
+      }
+    });
+
+    return [
+      {
+        steamid: currentUser.steamid,
+        name: currentUser.username,
+        avatar: currentUser.avatar,
+        status: currentUser.status,
+        x: CX,
+        y: CY,
+        r: USER_R,
+        isUser: true,
+      },
+      ...friendNodes,
+    ];
+  }, [currentUser, friends, rings, CX, CY]);
 
   const edges = useMemo<Edge[]>(() => {
     const set = new Set<string>();
@@ -120,12 +182,15 @@ export function FriendNetwork() {
       // user connected to every friend
       friends.forEach((f) => add(currentUser.steamid, f.steamid));
       // mutual friend connections
+      const known = new Set(friends.map((f) => f.steamid));
       friends.forEach((f) =>
-        f.mutualFriendIds.forEach((m) => add(f.steamid, m)),
+        (f.mutualFriendIds ?? []).forEach(
+          (m) => known.has(m) && add(f.steamid, m),
+        ),
       );
     }
     return list;
-  }, []);
+  }, [friends, currentUser]);
 
   const nodeById = useMemo(() => {
     const map = new Map<string, Node>();
@@ -133,27 +198,31 @@ export function FriendNetwork() {
     return map;
   }, [nodes]);
 
+  // Outline highlight follows hover, falling back to the selection.
   const active = hovered ?? selected;
+  // Connections are shown for the hovered node, otherwise for whoever is
+  // selected (the user by default).
+  const lineSource = hovered ?? selected;
   const neighborIds = useMemo(() => {
-    if (!active) return null;
-    const set = new Set<string>([active]);
+    if (!lineSource) return null;
+    const set = new Set<string>([lineSource]);
     edges.forEach((e) => {
-      if (e.a === active) set.add(e.b);
-      if (e.b === active) set.add(e.a);
+      if (e.a === lineSource) set.add(e.b);
+      if (e.b === lineSource) set.add(e.a);
     });
     return set;
-  }, [active, edges]);
+  }, [lineSource, edges]);
 
+  const isSpoke = (e: Edge) =>
+    currentUser != null &&
+    (e.a === currentUser.steamid || e.b === currentUser.steamid);
   const isEdgeActive = (e: Edge) =>
-    active != null && (e.a === active || e.b === active);
+    lineSource != null && (e.a === lineSource || e.b === lineSource);
+  const visibleEdges = edges.filter(isEdgeActive);
   const isNodeDimmed = (id: string) =>
     neighborIds != null && !neighborIds.has(id);
 
-  const selectedFriend =
-    selected && selected !== "u0" ? getFriend(selected) : undefined;
-  const selectedGame = selectedFriend?.currentGameId
-    ? getGame(selectedFriend.currentGameId)
-    : undefined;
+  const selectedNode = selected ? nodeById.get(selected) : undefined;
 
   if (!loaded) return;
   else
@@ -170,32 +239,47 @@ export function FriendNetwork() {
             aria-hidden="true"
           />
           <svg
-            viewBox={`0 0 ${W} ${H}`}
+            viewBox={`0 0 ${SIZE} ${SIZE}`}
             className="relative h-auto w-full"
             role="img"
             aria-label="Friend network graph. Select a node to see details."
           >
-            {/* edges */}
-            <g>
-              {edges.map((e) => {
-                const a = nodeById.get(e.a)!;
-                const b = nodeById.get(e.b)!;
-                const activeEdge = isEdgeActive(e);
-                return (
-                  <line
-                    key={`${e.a}-${e.b}`}
-                    x1={a.x}
-                    y1={a.y}
-                    x2={b.x}
-                    y2={b.y}
-                    stroke={activeEdge ? "var(--primary)" : "var(--border)"}
-                    strokeOpacity={
-                      active == null ? 0.5 : activeEdge ? 0.9 : 0.12
-                    }
-                    strokeWidth={activeEdge ? 2 : 1.25}
-                  />
-                );
-              })}
+            {/* ring guides */}
+            <g fill="none" stroke="var(--border)" strokeOpacity={0.6}>
+              {rings.map((ring) => (
+                <circle
+                  key={ring.radius}
+                  cx={CX}
+                  cy={CY}
+                  r={ring.radius}
+                  strokeWidth={1.25}
+                  strokeDasharray="4 6"
+                />
+              ))}
+            </g>
+
+            {/* edges: only the hovered node's links (or the user's while the
+                user is selected). Spokes are drawn first, mutual links on top. */}
+            <g stroke="var(--primary)">
+              {[...visibleEdges]
+                .sort((x, y) => Number(!isSpoke(x)) - Number(!isSpoke(y)))
+                .map((e) => {
+                  const a = nodeById.get(e.a);
+                  const b = nodeById.get(e.b);
+                  if (!a || !b) return null;
+                  const spoke = isSpoke(e);
+                  return (
+                    <line
+                      key={`${e.a}-${e.b}`}
+                      x1={a.x}
+                      y1={a.y}
+                      x2={b.x}
+                      y2={b.y}
+                      strokeOpacity={spoke ? 0.55 : 0.9}
+                      strokeWidth={spoke ? 1.25 : 2}
+                    />
+                  );
+                })}
             </g>
 
             <defs>
@@ -220,6 +304,7 @@ export function FriendNetwork() {
                   onClick={() => setSelected(n.steamid)}
                   style={{ transition: "opacity 150ms" }}
                 >
+                  <title>{n.name}</title>
                   <circle
                     cx={n.x}
                     cy={n.y}
@@ -239,142 +324,39 @@ export function FriendNetwork() {
                     clipPath={`url(#clip-${n.steamid})`}
                     preserveAspectRatio="xMidYMid slice"
                   />
-                  {/* status dot */}
-                  <circle
-                    cx={n.x + n.r * 0.72}
-                    cy={n.y + n.r * 0.72}
-                    r={7}
-                    fill={statusStroke[n.status]}
-                    stroke="var(--card)"
-                    strokeWidth={2.5}
-                  />
                   {/* label */}
                   <text
                     x={n.x}
-                    y={n.y + n.r + 20}
+                    y={n.y + n.r + (n.isUser ? 22 : 18)}
                     textAnchor="middle"
-                    fontSize={n.isUser ? 16 : 13}
+                    fontSize={n.isUser ? 16 : 12}
                     fontWeight={600}
                     fill="var(--foreground)"
                   >
-                    {n.name}
+                    {truncate(
+                      n.name,
+                      n.isUser ? USER_LABEL_CHARS : NODE_LABEL_CHARS,
+                    )}
                   </text>
                 </g>
               );
             })}
           </svg>
-
-          {/* legend */}
-          <div className="absolute bottom-3 left-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-md border border-border bg-popover/90 px-3 py-2 text-xs text-muted-foreground backdrop-blur">
-            <span className="flex items-center gap-1.5">
-              <StatusDot status="Online" /> In-Game
-            </span>
-            <span className="flex items-center gap-1.5">
-              <StatusDot status="Online" /> Online
-            </span>
-            <span className="flex items-center gap-1.5">
-              <StatusDot status="Offline" /> Offline
-            </span>
-          </div>
         </div>
 
-        {/* Detail panel */}
-        <aside className="rounded-xl border border-border bg-card p-5">
-          {selected === "u0" || !selectedFriend ? (
-            //<UserPanel />
-            <div />
-          ) : (
-            <div>
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Image
-                    src={selectedFriend.avatar || "/placeholder.svg"}
-                    alt=""
-                    width={64}
-                    height={64}
-                    className="rounded-md"
-                  />
-                  <StatusDot
-                    status={selectedFriend.status}
-                    className="absolute -bottom-1 -right-1 size-3.5 ring-2 ring-card"
-                  />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="truncate text-lg font-semibold text-foreground">
-                    {selectedFriend.name}{" "}
-                    <span aria-hidden>{selectedFriend.countryFlag}</span>
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Level {selectedFriend.level} ·{" "}
-                    {statusLabel[selectedFriend.status]}
-                  </p>
-                </div>
-              </div>
-
-              {selectedGame && (
-                <div className="mt-4 flex items-center gap-2 rounded-md border border-status-Online/30 bg-status-Online/10 px-3 py-2 text-sm">
-                  <Gamepad2 className="size-4 text-status-Online" />
-                  <span className="text-foreground">
-                    Playing{" "}
-                    <span className="font-medium">{selectedGame.title}</span>
-                  </span>
-                </div>
-              )}
-
-              <dl className="mt-5 grid grid-cols-2 gap-3">
-                <div className="rounded-md bg-secondary/40 p-3">
-                  <dt className="text-xs text-muted-foreground">
-                    Total playtime
-                  </dt>
-                  <dd className="mt-0.5 font-mono text-lg font-semibold text-foreground">
-                    {selectedFriend.totalPlaytime.toLocaleString()}h
-                  </dd>
-                </div>
-                <div className="rounded-md bg-secondary/40 p-3">
-                  <dt className="text-xs text-muted-foreground">
-                    Mutual friends
-                  </dt>
-                  <dd className="mt-0.5 font-mono text-lg font-semibold text-foreground">
-                    {selectedFriend.mutualFriendIds.length}
-                  </dd>
-                </div>
-              </dl>
-
-              <div className="mt-5">
-                <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  <Users className="size-3.5" /> Mutual connections
-                </p>
-                <ul className="flex flex-col gap-1">
-                  {selectedFriend.mutualFriendIds.map((mid) => {
-                    const mf = getFriend(mid);
-                    if (!mf) return null;
-                    return (
-                      <li key={mid}>
-                        <button
-                          type="button"
-                          onClick={() => setSelected(mid)}
-                          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-secondary/60"
-                        >
-                          <Image
-                            src={mf.avatar || "/placeholder.svg"}
-                            alt=""
-                            width={28}
-                            height={28}
-                            className="rounded"
-                          />
-                          <span className="text-sm text-foreground">
-                            {mf.name}
-                          </span>
-                          <StatusDot status={mf.status} className="ml-auto" />
-                        </button>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
-          )}
-        </aside>
+        {/* Player card for the selected node */}
+        {selectedNode && (
+          <PlayerCard
+            steamid={selectedNode.steamid}
+            fallback={{
+              username: selectedNode.name,
+              avatar: selectedNode.avatar,
+            }}
+            isUser={selectedNode.isUser}
+            friendOf={currentUser?.steamid}
+            className="lg:sticky lg:top-4 lg:self-start"
+          />
+        )}
       </div>
     );
 }

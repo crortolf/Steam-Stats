@@ -9,17 +9,21 @@ import {
   SumAchievementData,
 } from "@/lib/types";
 import { GameCapsule } from "./game-capsule";
-import { Trophy, Lock, Check, Globe, Users, ArrowUp, ArrowDown } from "lucide-react";
+import { Trophy, Lock, Check, Globe, Users } from "lucide-react";
+import {
+  SortChips,
+  type SortDirection,
+  type SortOption,
+} from "@/components/sort-chips";
 import { per } from "./achievements-view";
 import { cn } from "@/lib/utils";
 import { AchievementCard } from "./achievement-card";
 import { achievements } from "@/lib/mock-data";
-import { Button } from "@/components/ui/button";
 
 type SortKey = "global" | "friends" | "unlocked" | "name";
-type SortDir = "asc" | "desc";
+type SortDir = SortDirection;
 
-const SORTS: { key: SortKey; label: string }[] = [
+const SORTS: readonly SortOption<SortKey>[] = [
   { key: "global", label: "Global rarity" },
   { key: "friends", label: "Friend rarity" },
   { key: "unlocked", label: "Unlocked" },
@@ -232,38 +236,14 @@ export function AchievementsPane({
         <div>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
             <h3 className="font-semibold text-foreground">All achievements</h3>
-            <div
-              className="flex flex-wrap gap-2"
-              role="group"
-              aria-label="Sort achievements"
-            >
-              {SORTS.map((sort) => {
-                const active = sort.key === sortKey;
-                return (
-                  <Button
-                    key={sort.key}
-                    type="button"
-                    size="sm"
-                    variant={active ? "default" : "outline"}
-                    aria-pressed={active}
-                    title={
-                      active
-                        ? `${sortHint(sort.key, sortDir)}. Click to reverse.`
-                        : `Sort by ${sort.label.toLowerCase()}`
-                    }
-                    onClick={() => selectSort(sort.key)}
-                  >
-                    {sort.label}
-                    {active &&
-                      (sortDir === "asc" ? (
-                        <ArrowUp aria-hidden />
-                      ) : (
-                        <ArrowDown aria-hidden />
-                      ))}
-                  </Button>
-                );
-              })}
-            </div>
+            <SortChips
+              options={SORTS}
+              activeKey={sortKey}
+              direction={sortDir}
+              onSelect={selectSort}
+              describe={sortHint}
+              ariaLabel="Sort achievements"
+            />
           </div>
           <p className="mb-3 text-xs text-muted-foreground">
             {sortHint(sortKey, sortDir)}
