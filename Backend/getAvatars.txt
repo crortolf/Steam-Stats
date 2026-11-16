@@ -35,6 +35,10 @@
     "avatar": "https://avatars.steamstatic.com/f3b40d1e737cf32e69719e6b5d77543971bb9a8c_full.jpg",
     "name": "Tub Tub"
   },
+  "76561198079438360": {
+    "avatar": "https://avatars.steamstatic.com/56007fec0cdb1e2024825a400a13e671ea1159ac_full.jpg",
+    "name": "☭Agent 48☭"
+  },
   "76561198079481907": {
     "avatar": "https://avatars.steamstatic.com/b56984afc552c1c505e08f999e9ead2504bc3255_full.jpg",
     "name": "Herbert Hoover"

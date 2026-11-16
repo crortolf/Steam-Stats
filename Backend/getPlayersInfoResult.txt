@@ -7256,7 +7256,12 @@
     "name": "Tub Tub"
   },
   null,
-  null,
+  {
+    "id": "76561198079438360",
+    "games": [],
+    "image": "https://avatars.steamstatic.com/56007fec0cdb1e2024825a400a13e671ea1159ac_full.jpg",
+    "name": "☭Agent 48☭"
+  },
   {
     "id": "76561198079481907",
     "games": {
@@ -13282,7 +13287,12 @@
     "name": "hex: big tits"
   },
   null,
-  null,
+  {
+    "id": "76561198175562966",
+    "games": null,
+    "image": null,
+    "name": null
+  },
   null,
   {
     "id": "76561198177715286",
