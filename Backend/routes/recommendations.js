@@ -43,13 +43,20 @@ const requireSteamAccount = (req, response, next) =>
 router.get(
   "/",
   requireUser,
-  handle((req, res) => getFeed(req, res, { mine: false })),
+  handle((req, res) => getFeed(req, res, { scope: "all" })),
 );
 //the signed in user's own recommendations, newest first
 router.get(
   "/mine",
   requireUser,
-  handle((req, res) => getFeed(req, res, { mine: true })),
+  handle((req, res) => getFeed(req, res, { scope: "mine" })),
+);
+//recommendations by the user's steam friends, newest first; the friend list
+//comes from steam, so this needs a key and steam id
+router.get(
+  "/friends",
+  requireSteamAccount,
+  handle((req, res) => getFeed(req, res, { scope: "friends" })),
 );
 router.get("/games", requireSteamAccount, handle(searchGames));
 router.get("/achievements", requireSteamAccount, handle(getGameAchievements));

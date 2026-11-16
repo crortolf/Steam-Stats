@@ -17,6 +17,10 @@ recommendations
 recommendations
   .createIndex({ authorId: 1, createdAt: -1, _id: -1 })
   .catch((e) => console.log(e.message));
+//the friends feed matches posts by the authors' steam ids
+recommendations
+  .createIndex({ "author.steamId": 1, createdAt: -1, _id: -1 })
+  .catch((e) => console.log(e.message));
 
 const insertRecommendation = async (recommendation) => {
   const doc = { ...recommendation, createdAt: new Date() };
@@ -38,11 +42,26 @@ const decodeCursor = (cursor) => {
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 //one page of a feed, newest first. authorId limits it to one user's posts,
+//authorSteamIds to posts written from those steam accounts (the friends feed),
 //gameTitle to games whose name contains that text (ignoring case). before is
 //the cursor from the previous page's nextCursor
-const listRecommendations = async ({ authorId, gameTitle, before, limit }) => {
+const listRecommendations = async ({
+  authorId,
+  authorSteamIds,
+  gameTitle,
+  before,
+  limit,
+}) => {
+  //no friends (or a private friend list) means nothing to show
+  if (authorSteamIds !== undefined && authorSteamIds.length === 0) {
+    return { items: [], nextCursor: null };
+  }
+
   const filter = {};
   if (authorId !== undefined) filter.authorId = authorId;
+  if (authorSteamIds !== undefined) {
+    filter["author.steamId"] = { $in: authorSteamIds };
+  }
   if (gameTitle) {
     filter["game.name"] = { $regex: escapeRegex(gameTitle), $options: "i" };
   }

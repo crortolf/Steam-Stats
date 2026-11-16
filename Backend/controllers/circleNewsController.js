@@ -4,6 +4,7 @@ const { getGamesInfo } = require("../services/games");
 const { getPlayersInfo } = require("../services/players");
 const { getIds } = require("../services/friends");
 const { isStale, cacheFailure, scopedId } = require("../services/cache");
+const { getFlaggedIds } = require("../services/flaggedUsers");
 const mc = require("mongodb");
 
 const mongo = new mc.MongoClient("mongodb://localhost:27017", {
@@ -32,7 +33,9 @@ const getNews = (apiKey, steamId) => {
       }
       //push promise for all avatars and names of friends
       populations.push(getAvatars(apiKey, friendsList, avatars));
-      return Promise.all(populations).then(() => {
+      //friends with flagged usernames are only counted, never named
+      const flagged = getFlaggedIds(friendsList);
+      return Promise.all([flagged, ...populations]).then(([flaggedIds]) => {
         console.log("got here");
         console.log(JSON.stringify());
         const gamePromises = [];
@@ -40,7 +43,13 @@ const getNews = (apiKey, steamId) => {
         for (const appid in friendGames) {
           console.log("pushing promise for " + appid);
           gamePromises.push(
-            requestGameInfo(apiKey, appid, friendGames[appid], avatars),
+            requestGameInfo(
+              apiKey,
+              appid,
+              friendGames[appid],
+              avatars,
+              flaggedIds,
+            ),
           );
         }
 
@@ -164,14 +173,22 @@ const retreiveGameNews = (id) => {
     });
 };
 
-const requestGameInfo = (key, appid, players, avatars) => {
+const requestGameInfo = (key, appid, players, avatars, flaggedIds) => {
   return getGamesInfo(key, [appid]).then((gameInfo) => {
-    return mapGameResults(gameInfo, players, avatars, appid);
+    return mapGameResults(gameInfo, players, avatars, appid, flaggedIds);
   });
 };
 
 //builds the FriendGame object described in the frontend's lib/types.ts
-const mapGameResults = (gameInfo, players, avatars, appid) => {
+//players with flagged usernames (see FlaggedUsers) are left out of players and
+//only counted in otherPlayers, so their name and avatar never reach the page
+const mapGameResults = (
+  gameInfo,
+  players,
+  avatars,
+  appid,
+  flaggedIds = new Set(),
+) => {
   const game = gameInfo[0];
   if (!game) {
     console.log("failed to retreive " + appid);
@@ -182,8 +199,10 @@ const mapGameResults = (gameInfo, players, avatars, appid) => {
     game: { id: game.id, name: game.name, image: game.image },
     //friends without a retreivable profile have no avatars entry
     players: players
+      .filter((steamid) => !flaggedIds.has(steamid))
       .map((steamid) => avatars[steamid])
       .filter((player) => player !== undefined),
+    otherPlayers: players.filter((steamid) => flaggedIds.has(steamid)).length,
   };
 };
 

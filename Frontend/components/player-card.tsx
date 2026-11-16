@@ -9,6 +9,7 @@ import {
 } from "react";
 import axios from "axios";
 import Image from "next/image";
+import { PixelateFilterDefs } from "@/components/pixelate-filter";
 import {
   CalendarDays,
   Clock,
@@ -87,7 +88,7 @@ const flagOf = (code: string) =>
 type Props = {
   steamid: string;
   /** Shown straight away while the full card loads. */
-  fallback?: { username: string; avatar: string };
+  fallback?: { username: string; avatar: string; censored?: boolean };
   /** Marks the card as the signed-in user's own profile. */
   isUser?: boolean;
   /** Steam id of the viewing user, used to show how long they've been friends. */
@@ -172,6 +173,7 @@ export function PlayerCard({
   const shown = data?.steamid === steamid ? data : undefined;
   const username = shown?.username ?? fallback?.username ?? "Loading…";
   const avatar = shown?.avatar ?? fallback?.avatar;
+  const censored = shown?.censored ?? fallback?.censored ?? false;
   const online = shown != null && shown.status !== "Offline";
 
   return (
@@ -181,6 +183,7 @@ export function PlayerCard({
     >
       <div className="flex items-start gap-3">
         <div className="relative shrink-0">
+          {censored && <PixelateFilterDefs id="pixelate-card" size={10} />}
           {avatar ? (
             <Image
               src={avatar}
@@ -188,6 +191,7 @@ export function PlayerCard({
               width={64}
               height={64}
               className={cn("rounded-md", isUser && "ring-2 ring-primary")}
+              style={censored ? { filter: "url(#pixelate-card)" } : undefined}
               unoptimized
             />
           ) : (

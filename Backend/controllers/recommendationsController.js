@@ -4,6 +4,7 @@ const {
   searchCachedGames,
 } = require("../services/games");
 const { retrievePlayerSummaries } = require("../services/players");
+const { getIds } = require("../services/friends");
 const { spAchievementData } = require("./achievementsController");
 const {
   insertRecommendation,
@@ -67,15 +68,23 @@ const pageSize = (raw) => {
 
 const MAX_GAME_SEARCH_LENGTH = 100;
 
-//newest first; mine limits it to the signed in user's own posts, and an
-//optional ?game= to games whose title contains that text
-const getFeed = async (req, response, { mine }) => {
+//newest first. scope is "all" for everyone's posts, "mine" for the signed in
+//user's own, or "friends" for posts by their steam friends; an optional
+//?game= limits it to games whose title contains that text
+//the friends scope reads the friend list with the user's own key (cached per
+//key), so it only ever uses friends steam lets this user see
+const getFeed = async (req, response, { scope }) => {
   const game =
     typeof req.query.game === "string"
       ? req.query.game.trim().slice(0, MAX_GAME_SEARCH_LENGTH)
       : "";
+  const authorSteamIds =
+    scope === "friends"
+      ? await getIds(req.steamApiKey, req.user.steamId)
+      : undefined;
   const { items, nextCursor } = await listRecommendations({
-    authorId: mine ? req.user._id : undefined,
+    authorId: scope === "mine" ? req.user._id : undefined,
+    authorSteamIds,
     gameTitle: game || undefined,
     before: req.query.before,
     limit: pageSize(req.query.limit),
