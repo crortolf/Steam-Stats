@@ -1,5 +1,6 @@
 const { getIds, getFriendSince } = require("../services/friends");
 const { retrievePlayerSummaries } = require("../services/players");
+const { getFlaggedIds, maskName } = require("../services/flaggedUsers");
 
 const getFriends = async (key, steamid) => {
   const friends = await getIds(key, steamid);
@@ -8,12 +9,13 @@ const getFriends = async (key, steamid) => {
   const friendsData = retrievePlayerSummaries(key, friends);
 
   const mutuals = findMutualFriends(key, friends);
+  const flagged = getFlaggedIds([steamid, ...friends]);
 
-  return Promise.all([userData, friendsData, mutuals]).then(
-    ([userPlayers, friendPlayers, mutualMap]) => {
+  return Promise.all([userData, friendsData, mutuals, flagged]).then(
+    ([userPlayers, friendPlayers, mutualMap, flaggedIds]) => {
       const circle = {
-        user: convertUserData(userPlayers[0]),
-        friends: friendPlayers.map((user) => convertUserData(user)),
+        user: convertUserData(userPlayers[0], flaggedIds),
+        friends: friendPlayers.map((user) => convertUserData(user, flaggedIds)),
       };
       circle.user.mutualFriendIds = [];
       circle.friends.forEach(
@@ -127,8 +129,11 @@ const findConnection = async (key, idOne, idTwo) => {
 };
 
 const collectUserInfo = (key, orderedUserCodes) => {
-  return retrievePlayerSummaries(key, orderedUserCodes)
-    .then((unorderedUserData) => {
+  return Promise.all([
+    retrievePlayerSummaries(key, orderedUserCodes),
+    getFlaggedIds(orderedUserCodes),
+  ])
+    .then(([unorderedUserData, flaggedIds]) => {
       const orderedUserData = [];
       for (let i = 0; i < orderedUserCodes.length; i++) {
         for (let j = 0; j < unorderedUserData.length; j++) {
@@ -139,7 +144,7 @@ const collectUserInfo = (key, orderedUserCodes) => {
         }
       }
 
-      return orderedUserData.map(convertUserData);
+      return orderedUserData.map((user) => convertUserData(user, flaggedIds));
     })
     .catch((e) => console.error(e.message));
 };
@@ -164,7 +169,7 @@ const toStoreAppId = (gameid) => {
 //have been friends
 const getPlayerCard = async (key, steamid, friendOf) => {
   if (!steamid) throw new Error("Please provide a Steam ID.");
-  const [[summary], friendSince] = await Promise.all([
+  const [[summary], friendSince, flaggedIds] = await Promise.all([
     retrievePlayerSummaries(key, [steamid], {
       maxAgeMs: PLAYER_CARD_MAX_AGE_MS,
       withUpdatedAt: true,
@@ -175,13 +180,18 @@ const getPlayerCard = async (key, steamid, friendOf) => {
           return null;
         })
       : null,
+    getFlaggedIds([steamid]),
   ]);
   if (!summary) return null;
 
+  const user = convertUserData(summary, flaggedIds);
   return {
-    ...convertUserData(summary),
-    realName: summary.realname ?? null,
-    profileUrl: summary.profileurl ?? null,
+    ...user,
+    //a flagged player's real name and custom profile url could show the name too
+    realName: user.censored ? null : (summary.realname ?? null),
+    profileUrl: user.censored
+      ? `https://steamcommunity.com/profiles/${summary.steamid}/`
+      : (summary.profileurl ?? null),
     countryCode: summary.loccountrycode ?? null,
     //3 = public; private profiles hide most fields, including timecreated
     isPublic: summary.communityvisibilitystate === 3,
@@ -200,12 +210,16 @@ const getPlayerCard = async (key, steamid, friendOf) => {
 };
 
 //convert returned api userdata into a form we want to display
-const convertUserData = (user) => {
+//players in flaggedIds (see FlaggedUsers) get their name masked, and the
+//frontend pixelates their avatar when censored is set
+const convertUserData = (user, flaggedIds = new Set()) => {
+  const censored = flaggedIds.has(user.steamid);
   return {
-    username: user.personaname,
+    username: censored ? maskName(user.personaname) : user.personaname,
     steamid: user.steamid,
     avatar: user.avatarfull,
     status: statusMap[user.personastate],
+    censored,
   };
 };
 

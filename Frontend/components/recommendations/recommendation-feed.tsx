@@ -8,19 +8,28 @@ import type { Recommendation, RecommendationPage } from "@/lib/types";
 
 const PAGE_SIZE = 10;
 
+/** Whose recommendations a feed shows. */
+export type FeedScope = "all" | "friends" | "mine";
+
+const ENDPOINT_BY_SCOPE: Record<FeedScope, string> = {
+  all: "/",
+  friends: "/friends",
+  mine: "/mine",
+};
+
 /**
  * A blog-style feed, newest first, that loads older posts as you scroll.
  * Remount it (change `key`) to start again from the newest post, e.g. after
  * posting a new recommendation.
  */
 export function RecommendationFeed({
-  mine,
+  scope,
   gameTitle,
   emptyMessage,
   onDeleted,
 }: {
-  /** Only the signed-in user's own recommendations. */
-  mine: boolean;
+  /** Everyone's posts, the viewer's Steam friends' posts, or only their own. */
+  scope: FeedScope;
   /** Only games whose title contains this text; "" for every game. */
   gameTitle: string;
   emptyMessage: string;
@@ -47,7 +56,7 @@ export function RecommendationFeed({
       controller.current = ctrl;
       try {
         const res = await recommendationsApi.get<RecommendationPage>(
-          mine ? "/mine" : "/",
+          ENDPOINT_BY_SCOPE[scope],
           {
             params: {
               limit: PAGE_SIZE,
@@ -77,7 +86,7 @@ export function RecommendationFeed({
         }
       }
     },
-    [mine, gameTitle],
+    [scope, gameTitle],
   );
 
   // First page.

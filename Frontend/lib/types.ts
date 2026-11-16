@@ -22,6 +22,9 @@ export type PlayerCardData = {
   username: string;
   avatar: string;
   status: import("./mock-data").FriendStatus;
+  // Set for players with a flagged username: the backend has already replaced
+  // the name with asterisks, and the avatar should be shown pixelated.
+  censored: boolean;
   realName: string | null;
   profileUrl: string | null;
   countryCode: string | null;
@@ -100,6 +103,9 @@ export type Player = {
 export type FriendGame = {
   game: Game;
   players: Player[];
+  // Friends with flagged usernames who also played it recently; they're only
+  // counted, never named or shown.
+  otherPlayers?: number;
 };
 
 export type NewsPage = {

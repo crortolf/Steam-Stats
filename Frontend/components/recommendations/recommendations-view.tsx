@@ -1,14 +1,38 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Menu, Plus } from "lucide-react";
+import { Globe, Menu, Plus, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RecommendationFeed } from "./recommendation-feed";
+import { RecommendationFeed, type FeedScope } from "./recommendation-feed";
 import { NewRecommendationDialog } from "./new-recommendation-dialog";
 import { GameSearch } from "./game-search";
 
+/** Who the community feed shows posts from. */
+type Audience = Exclude<FeedScope, "mine">;
+
+const AUDIENCES: { value: Audience; label: string; icon: typeof Globe }[] = [
+  { value: "all", label: "Global", icon: Globe },
+  { value: "friends", label: "Friends", icon: Users },
+];
+
+const HEADINGS: Record<FeedScope, string> = {
+  all: "From the community",
+  friends: "From your friends",
+  mine: "Your recommendations",
+};
+
+const EMPTY_MESSAGES: Record<FeedScope, string> = {
+  all: "No one has posted a recommendation yet. Be the first with the + button.",
+  friends:
+    "None of your Steam friends have posted a recommendation yet. If your friends list is private, Steam won't share it.",
+  mine: "You haven't recommended anything yet. Use the + button to write your first.",
+};
+
 export function RecommendationsView() {
   const [mine, setMine] = useState(false);
+  // Kept while viewing your own posts, so going back returns to the same feed.
+  const [audience, setAudience] = useState<Audience>("all");
+  const scope: FeedScope = mine ? "mine" : audience;
   // Text the feed's game titles are filtered by; "" for every game.
   const [gameTitle, setGameTitle] = useState("");
   const search = useCallback((title: string) => setGameTitle(title), []);
@@ -22,7 +46,7 @@ export function RecommendationsView() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-col gap-1">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              {mine ? "Your recommendations" : "From the community"}
+              {HEADINGS[scope]}
             </h2>
             {mine && (
               <button
@@ -34,18 +58,46 @@ export function RecommendationsView() {
               </button>
             )}
           </div>
-          <GameSearch onSearch={search} />
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+            {!mine && (
+              <div
+                role="group"
+                aria-label="Show recommendations from"
+                className="inline-flex h-9 items-center rounded-lg bg-muted p-[3px]"
+              >
+                {AUDIENCES.map(({ value, label, icon: Icon }) => {
+                  const active = audience === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAudience(value)}
+                      aria-pressed={active}
+                      className={cn(
+                        "inline-flex h-full items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
+                        active
+                          ? "bg-background text-foreground shadow-sm dark:bg-input/30"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      <Icon className="size-3.5" aria-hidden />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <GameSearch onSearch={search} />
+          </div>
         </div>
         <RecommendationFeed
-          key={`${mine ? "mine" : "all"}-${gameTitle}-${feedVersion}`}
-          mine={mine}
+          key={`${scope}-${gameTitle}-${feedVersion}`}
+          scope={scope}
           gameTitle={gameTitle}
           emptyMessage={
             gameTitle
               ? `No recommendations for games matching "${gameTitle}".`
-              : mine
-              ? "You haven't recommended anything yet. Use the + button to write your first."
-              : "No one has posted a recommendation yet. Be the first with the + button."
+              : EMPTY_MESSAGES[scope]
           }
         />
       </div>

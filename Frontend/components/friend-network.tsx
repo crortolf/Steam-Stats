@@ -5,12 +5,14 @@ import axios from "axios";
 import type { FriendStatus } from "@/lib/mock-data";
 import { PlayerCard } from "@/components/player-card";
 import { useAuth } from "@/lib/auth";
+import { PixelateFilter } from "@/components/pixelate-filter";
 
 type Node = {
   steamid: string;
   name: string;
   avatar: string;
   status: FriendStatus;
+  censored: boolean;
   x: number;
   y: number;
   r: number;
@@ -22,6 +24,8 @@ type UserData = {
   steamid: string;
   avatar: string;
   status: FriendStatus;
+  // flagged username: name arrives as asterisks, avatar is pixelated here
+  censored?: boolean;
   mutualFriendIds: string[];
 };
 
@@ -146,6 +150,7 @@ export function FriendNetwork() {
           name: f.username,
           avatar: f.avatar,
           status: f.status,
+          censored: f.censored === true,
           x: CX + Math.cos(angle) * ring.radius,
           y: CY + Math.sin(angle) * ring.radius,
           r: NODE_R,
@@ -160,6 +165,7 @@ export function FriendNetwork() {
         name: currentUser.username,
         avatar: currentUser.avatar,
         status: currentUser.status,
+        censored: currentUser.censored === true,
         x: CX,
         y: CY,
         r: USER_R,
@@ -283,9 +289,12 @@ export function FriendNetwork() {
             </g>
 
             <defs>
+              {/* blocks of 9 units leave a friend avatar ~6 blocks across */}
+              <PixelateFilter id="pixelate-node" size={9} />
               {nodes.map((n) => (
+                // in the avatar's own coordinates, see the <image> below
                 <clipPath key={n.steamid} id={`clip-${n.steamid}`}>
-                  <circle cx={n.x} cy={n.y} r={n.r} />
+                  <circle cx={n.r} cy={n.r} r={n.r} />
                 </clipPath>
               ))}
             </defs>
@@ -315,14 +324,20 @@ export function FriendNetwork() {
                     }
                     strokeWidth={isActive ? 3 : 2}
                   />
+                  {/* placed with a transform so its clip and the pixelate
+                      filter work in coordinates starting at the avatar's
+                      corner; the filter's grid is absolute and would fall
+                      outside an avatar drawn at x/y */}
                   <image
                     href={n.avatar}
-                    x={n.x - n.r}
-                    y={n.y - n.r}
+                    x={0}
+                    y={0}
+                    transform={`translate(${n.x - n.r} ${n.y - n.r})`}
                     width={n.r * 2}
                     height={n.r * 2}
                     clipPath={`url(#clip-${n.steamid})`}
                     preserveAspectRatio="xMidYMid slice"
+                    filter={n.censored ? "url(#pixelate-node)" : undefined}
                   />
                   {/* label */}
                   <text
@@ -351,6 +366,7 @@ export function FriendNetwork() {
             fallback={{
               username: selectedNode.name,
               avatar: selectedNode.avatar,
+              censored: selectedNode.censored,
             }}
             isUser={selectedNode.isUser}
             friendOf={currentUser?.steamid}

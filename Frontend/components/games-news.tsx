@@ -37,7 +37,15 @@ const titleCollator = new Intl.Collator(undefined, {
 const byTitle = (a: FriendGame, b: FriendGame) =>
   titleCollator.compare(a.game.name, b.game.name);
 const friendCount = (g: FriendGame) =>
-  g.players.filter((p) => p !== null).length;
+  g.players.filter((p) => p !== null).length + (g.otherPlayers ?? 0);
+
+// "and 2 other players" after named friends, "3 players" when nobody is named
+const otherPlayersText = (others: number, anyNamed: boolean) => {
+  const players = others === 1 ? "player" : "players";
+  return anyNamed
+    ? `and ${others} other ${players}`
+    : `${others} ${players} played this recently`;
+};
 
 // Direction each sort starts in when first picked: A→Z, most friends first.
 const defaultDirection: Record<SortKey, SortDirection> = {
@@ -158,6 +166,14 @@ export function GamesNews() {
                       .map((friendPlayer) => {
                         return <FriendCapsule friendPlayer={friendPlayer} />;
                       })}
+                    {(p.otherPlayers ?? 0) > 0 && (
+                      <span className="shrink-0 text-sm text-muted-foreground">
+                        {otherPlayersText(
+                          p.otherPlayers ?? 0,
+                          p.players.some((f) => f !== null),
+                        )}
+                      </span>
+                    )}
                   </div>
                 </div>
               </li>
