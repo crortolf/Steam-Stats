@@ -82,6 +82,12 @@ function sortHint(key: SortKey, dir: SortDir) {
   }
 }
 
+/**
+ * The achievements breakdown for one game. On the left: the game's banner, the
+ * user's completion and rarest unlock. On the right: the user's completion
+ * compared with their friends' and the global average, and every achievement
+ * as an AchievementCard, sortable with SortChips.
+ */
 export function AchievementsPane({
   achievementsData,
 }: {
@@ -270,6 +276,9 @@ const toneBg: Record<string, string> = {
   muted: "bg-muted-foreground",
 };
 
+/**
+ * A thin horizontal bar filled to a percentage, in one of the pane's colours.
+ */
 function Bar({
   value,
   tone,
@@ -294,6 +303,10 @@ function Bar({
   );
 }
 
+/**
+ * A labelled percentage with a Bar, used to compare the user, their friends
+ * and all players.
+ */
 function ComparisonRow({
   label,
   value,
@@ -314,6 +327,10 @@ function ComparisonRow({
   );
 }
 
+/**
+ * A small icon, label and percentage above a Bar. Used on each AchievementCard
+ * for the global and friends unlock rates.
+ */
 export function LabeledBar({
   icon,
   label,
@@ -339,6 +356,9 @@ export function LabeledBar({
   );
 }
 
+/**
+ * A small card with a label, a large value and a hint underneath.
+ */
 function StandingCard({
   icon,
   label,

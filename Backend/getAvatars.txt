@@ -11,6 +11,10 @@
     "avatar": "https://avatars.steamstatic.com/356ec8b4c88e9b27e702cf0b9e57a2ad8b7a5db0_full.jpg",
     "name": "hypo"
   },
+  "76561198042211055": {
+    "avatar": "https://avatars.steamstatic.com/dfdbc3fbb32ff15d2119072a1b5dec19c71fb003_full.jpg",
+    "name": "Papa Squat"
+  },
   "76561198042239642": {
     "avatar": "https://avatars.steamstatic.com/853c1cdbf035555ee59f81d07ee686390ede0091_full.jpg",
     "name": "Schplungy"
@@ -23,6 +27,10 @@
     "avatar": "https://avatars.steamstatic.com/e76638c9418784d8eb72ad15b953aae3f24dd27b_full.jpg",
     "name": "Ritz"
   },
+  "76561198048048584": {
+    "avatar": "https://avatars.steamstatic.com/146773943a331e0ab2e7da8ace2469fb1226cc43_full.jpg",
+    "name": "TheCuddlySpartan"
+  },
   "76561198054042424": {
     "avatar": "https://avatars.steamstatic.com/48fe62c4acd46886e2ac055cd89f2c7769ab4eb6_full.jpg",
     "name": "BIG SEXY"
@@ -30,6 +38,14 @@
   "76561198055456108": {
     "avatar": "https://avatars.steamstatic.com/d4e2e62931629dc5d1f77c34b750da1404f91297_full.jpg",
     "name": "Scobblestein"
+  },
+  "76561198062299073": {
+    "avatar": "https://avatars.steamstatic.com/35619c15331635a4baa3ca8095837a19ead95f9e_full.jpg",
+    "name": "snoozechaser"
+  },
+  "76561198065322135": {
+    "avatar": "https://avatars.steamstatic.com/8364223153861b7626cdb192742b91af724b2929_full.jpg",
+    "name": "Draegondeez"
   },
   "76561198069525475": {
     "avatar": "https://avatars.steamstatic.com/f3b40d1e737cf32e69719e6b5d77543971bb9a8c_full.jpg",

@@ -40,6 +40,10 @@ type Highlights = Map<string, Highlight>;
 const textareaClass =
   "w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
 
+/**
+ * The popup for writing a new recommendation. Holds the RecommendationForm
+ * and calls onCreated once the post is published.
+ */
 export function NewRecommendationDialog({
   open,
   onOpenChange,
@@ -80,6 +84,12 @@ export function NewRecommendationDialog({
   );
 }
 
+/**
+ * The steps for writing a recommendation: pick a game (GamePicker), then write
+ * about it, give an optional score out of 10, add images, and highlight
+ * achievements. Posting waits for any uploads still running and shows the
+ * server's error message on failure.
+ */
 function RecommendationForm({
   onCreated,
 }: {

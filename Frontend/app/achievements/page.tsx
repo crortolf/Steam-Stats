@@ -1,6 +1,10 @@
 import { AchievementsView } from '@/components/achievements-view'
 import { RequireSteamKey } from '@/components/require-steam-key'
 
+/**
+ * The /achievements page: a heading over AchievementsView, which only loads
+ * once the user has added their Steam API key and account.
+ */
 export default function AchievementsPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">

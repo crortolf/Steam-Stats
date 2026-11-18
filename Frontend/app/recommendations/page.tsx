@@ -1,6 +1,10 @@
 import { RequireSteamKey } from "@/components/require-steam-key";
 import { RecommendationsView } from "@/components/recommendations/recommendations-view";
 
+/**
+ * The /recommendations page: a heading over RecommendationsView, which only
+ * loads once the user has added their Steam API key and account.
+ */
 export default function RecommendationsPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 pb-32">

@@ -4,6 +4,10 @@ import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * A progress bar (Base UI). Combine with ProgressTrack, ProgressIndicator,
+ * ProgressLabel and ProgressValue.
+ */
 function Progress({
   className,
   children,
@@ -25,6 +29,9 @@ function Progress({
   )
 }
 
+/**
+ * The empty background of a Progress bar.
+ */
 function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   return (
     <ProgressPrimitive.Track
@@ -38,6 +45,9 @@ function ProgressTrack({ className, ...props }: ProgressPrimitive.Track.Props) {
   )
 }
 
+/**
+ * The filled part of a Progress bar.
+ */
 function ProgressIndicator({
   className,
   ...props
@@ -51,6 +61,9 @@ function ProgressIndicator({
   )
 }
 
+/**
+ * A Progress bar's label.
+ */
 function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   return (
     <ProgressPrimitive.Label
@@ -61,6 +74,9 @@ function ProgressLabel({ className, ...props }: ProgressPrimitive.Label.Props) {
   )
 }
 
+/**
+ * A Progress bar's current value as text.
+ */
 function ProgressValue({ className, ...props }: ProgressPrimitive.Value.Props) {
   return (
     <ProgressPrimitive.Value

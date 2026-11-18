@@ -11,6 +11,10 @@ const colorByStatus: Record<FriendStatus, string> = {
   Snooze: "bg-status-offline",
 };
 
+/**
+ * A small coloured dot for a player's Steam status: light blue when online,
+ * grey for every other status.
+ */
 export function StatusDot({
   status,
   className,

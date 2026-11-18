@@ -21,18 +21,47 @@ const DEFAULT_PERSONA = "Colonel Fluffiluffiguss";
 const MAX_FRIENDS = 8;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Reads the value that follows a flag on the command line.
+ *
+ * @param {string} flag - ex: "--name".
+ * @returns {string|undefined} The next argument after the flag, or undefined
+ *   if the flag wasn't given.
+ */
 const argValue = (flag) => {
   const i = process.argv.indexOf(flag);
   return i === -1 ? undefined : process.argv[i + 1];
 };
 
-//a seeded random number generator, so every run makes the same mock data
 let rngState = 20261116;
+/**
+ * A seeded random number generator, so every run makes the same mock data.
+ *
+ * A linear congruential generator: each call advances rngState and scales it into [0, 1).
+ *
+ * @returns {number} A number from 0 (inclusive) to 1 (exclusive).
+ */
 const random = () => {
   rngState = (rngState * 1664525 + 1013904223) % 4294967296;
   return rngState / 4294967296;
 };
+/**
+ * Picks one random entry from a list.
+ *
+ * @param {Array} list - The list to pick from; must not be empty.
+ * @returns {*} One of its entries.
+ */
 const pick = (list) => list[Math.floor(random() * list.length)];
+/**
+ * Picks up to n different random entries from a list.
+ *
+ * Removes random entries from a copy until it has n or the copy runs out, so
+ * the list passed in isn't changed.
+ *
+ * @param {Array} list - The list to pick from.
+ * @param {number} n - How many to pick.
+ * @returns {Array} min(n, list.length) entries, in random order.
+ */
 const pickSome = (list, n) => {
   const copy = [...list];
   const out = [];
@@ -42,6 +71,12 @@ const pickSome = (list, n) => {
   return out;
 };
 
+/**
+ * Makes text safe to use inside a regular expression.
+ *
+ * @param {string} text - Text that should be matched literally.
+ * @returns {string} The text with a backslash before every special character.
+ */
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 // ---- what the friends write ----
@@ -86,7 +121,18 @@ const LOCKED_COMMENTS = [
 
 // ---- reading the cache ----
 
-//the newest cached summary for each steam id
+/**
+ * Gets the newest cached profile summary for each of several players.
+ *
+ * Reads every PlayerSummaries record for these ids (from any api key, newest
+ * first) and keeps the first one per player that has a name. Older cache
+ * records without a steamId are skipped.
+ *
+ * @param {import("mongodb").Collection} summaries - The PlayerSummaries collection.
+ * @param {string[]} steamIds - The players' steam ids.
+ * @returns {Promise<Map<string, object>>} Each player's summary record by steam
+ *   id. Players with no cached summary are missing.
+ */
 const latestSummaries = async (summaries, steamIds) => {
   const records = await summaries
     .find({ steamId: { $in: steamIds, $type: "string" } })
@@ -99,7 +145,13 @@ const latestSummaries = async (summaries, steamIds) => {
   return byId;
 };
 
-//ids of games a player owns, from any key's cached library
+/**
+ * Lists the games a player owns, from the newest cached library under any api key.
+ *
+ * @param {import("mongodb").Collection} owned - The OwnedGames collection.
+ * @param {string} steamId - The player's steam id.
+ * @returns {Promise<number[]>} The app ids; empty if no library is cached.
+ */
 const ownedAppIds = async (owned, steamId) => {
   const record = await owned.findOne(
     { steamId: { $eq: steamId }, games: { $exists: true, $ne: [] } },
@@ -108,6 +160,20 @@ const ownedAppIds = async (owned, steamId) => {
   return (record?.games ?? []).map((g) => g.id);
 };
 
+/**
+ * Runs the script: removes the previous mock friend posts, then (unless
+ * --remove was given) writes new ones.
+ *
+ * Finds the player by name, reads their friend list (the one cached under
+ * their account's own key when there is one, so it matches the Friends feed),
+ * picks up to 8 friends with cached profiles, and writes 1 to 3 posts for each,
+ * preferring games the friend owns. Each post highlights 1 to 3 of the game's
+ * achievements with a comment that names it.
+ *
+ * @returns {Promise<void>} Rejects with a message saying what isn't cached yet
+ *   if the player, their friend list, their friends' profiles or any games
+ *   with achievements are missing.
+ */
 const main = async () => {
   const client = await mc.MongoClient.connect("mongodb://localhost:27017");
   const db = client.db("Steam-Stats");

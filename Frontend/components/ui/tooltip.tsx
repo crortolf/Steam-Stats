@@ -4,6 +4,9 @@ import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Shares tooltip timing (ex: the delay before showing) with every Tooltip inside it.
+ */
 function TooltipProvider({
   delay = 0,
   ...props
@@ -17,14 +20,23 @@ function TooltipProvider({
   )
 }
 
+/**
+ * A tooltip (Base UI). Combine with TooltipTrigger and TooltipContent.
+ */
 function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
   return <TooltipPrimitive.Root data-slot="tooltip" {...props} />
 }
 
+/**
+ * The element that shows the tooltip when hovered or focused.
+ */
 function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />
 }
 
+/**
+ * The tooltip's popup text, with a small arrow pointing at the trigger.
+ */
 function TooltipContent({
   className,
   side = "top",

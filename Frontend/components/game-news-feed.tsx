@@ -12,7 +12,10 @@ const MAX_NEWS_ARTICLES = 50;
 const NEWS_UNAVAILABLE_MESSAGE =
   "News isn't available right now. Please try again another time.";
 
-//the article's first image, renders nothing if it has none or the image fails to load
+/**
+ * The first image in a news article, shown on its card. Renders nothing if the
+ * article has no image or the image fails to load.
+ */
 function NewsCardImage({
   contents,
   gameName,
@@ -41,7 +44,11 @@ function NewsCardImage({
   );
 }
 
-//loads a game's articles when it mounts, render with key={game.id} so each game starts fresh
+/**
+ * A game's news articles as cards, loaded a page at a time with a "Show more stories"
+ * button. Clicking a card opens the full article in NewsArticleDialog.
+ * Render it with key={game.id} so each game starts fresh.
+ */
 export function GameNewsFeed({ game }: { game: Game }) {
   const [articles, setArticles] = useState<NewsItem[]>([]);
   const [hasMore, setHasMore] = useState(false);

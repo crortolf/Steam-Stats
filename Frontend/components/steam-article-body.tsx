@@ -239,7 +239,12 @@ const renderElement = (element: BBElement, key: number): ReactNode => {
   }
 };
 
-//React escapes all of this text, so any HTML in an article shows as plain text
+/**
+ * Renders a Steam news article's BBCode as formatted HTML: headings, lists,
+ * links, images, videos, quotes, spoilers and tables. React escapes all of the
+ * text, so any HTML in an article shows as plain text, and only http(s) links
+ * and images are used.
+ */
 export function SteamArticleBody({ contents }: { contents: string }) {
   return (
     <div className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">

@@ -5,6 +5,11 @@ import { Globe, Users } from "lucide-react";
 import { SumAchievement } from "@/lib/types";
 import { per } from "./achievements-view";
 
+/**
+ * One achievement in the achievements list: its icon (greyed out while
+ * locked), name, description, unlock date, and bars for how many players
+ * worldwide and how many of the user's friends have it.
+ */
 export function AchievementCard({
   name,
   achieve,

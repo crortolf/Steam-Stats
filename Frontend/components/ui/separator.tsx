@@ -4,6 +4,9 @@ import { Separator as SeparatorPrimitive } from "@base-ui/react/separator"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * A thin horizontal or vertical dividing line.
+ */
 function Separator({
   className,
   orientation = "horizontal",

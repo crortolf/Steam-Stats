@@ -33,7 +33,19 @@ const MAX_PAGE_SIZE = 30;
 const MAX_POSTS_PER_HOUR = 10;
 const HOUR_MS = 60 * 60 * 1000;
 
-//a recommendation as other users see it: never the author's email
+/**
+ * Converts a stored post into what the browser receives. Never includes the
+ * author's email.
+ *
+ * Copies the fields the page shows, marks whether the viewer wrote it, and
+ * fills in defaults for older posts (no score, no images).
+ *
+ * @param {object} doc - A post from the Recommendations collection.
+ * @param {string} viewerId - The signed in user's account id (their email).
+ * @returns {{id: string, author: {steamId: string, name: string, avatar: string|null},
+ *   isYours: boolean, game: object, body: string, score: number|null,
+ *   images: object[], achievements: object[], createdAt: string}}
+ */
 const toPublicRecommendation = (doc, viewerId) => ({
   id: String(doc._id),
   author: {
@@ -52,13 +64,27 @@ const toPublicRecommendation = (doc, viewerId) => ({
   createdAt: doc.createdAt.toISOString(),
 });
 
-//an optional list of uploaded image ids, or null if it isn't one
+/**
+ * Checks an optional list of uploaded image ids from the request.
+ *
+ * @param {unknown} value - The images field from the request body.
+ * @param {number} max - The most images allowed.
+ * @returns {string[]|null} The ids ([] when value is missing), or null if it
+ *   isn't an array of strings or has more than max entries.
+ */
 const imageIdList = (value, max) => {
   if (value === undefined || value === null) return [];
   if (!Array.isArray(value) || value.length > max) return null;
   return value.every((id) => typeof id === "string") ? value : null;
 };
 
+/**
+ * Reads the ?limit= for a feed page.
+ *
+ * @param {unknown} raw - The limit query parameter.
+ * @returns {number} raw as a whole number from 1 to 30, or 10 if it's missing
+ *   or outside that range.
+ */
 const pageSize = (raw) => {
   const n = Number(raw ?? DEFAULT_PAGE_SIZE);
   return Number.isInteger(n) && n >= 1 && n <= MAX_PAGE_SIZE
@@ -68,11 +94,23 @@ const pageSize = (raw) => {
 
 const MAX_GAME_SEARCH_LENGTH = 100;
 
-//newest first. scope is "all" for everyone's posts, "mine" for the signed in
-//user's own, or "friends" for posts by their steam friends; an optional
-//?game= limits it to games whose title contains that text
-//the friends scope reads the friend list with the user's own key (cached per
-//key), so it only ever uses friends steam lets this user see
+/**
+ * GET /recommendations, /recommendations/mine and /recommendations/friends.
+ * Sends one page of a feed, newest first.
+ *
+ * Trims the game search, reads the friend list for the friends scope, and
+ * fetches the page with listRecommendations. The friends scope reads the friend
+ * list with the user's own key (cached per key), so it only ever uses friends
+ * steam lets this user see.
+ *
+ * @param {import("express").Request} req - req.query: { game?, before?, limit? }.
+ *   Needs req.user; the friends scope also needs req.steamApiKey.
+ * @param {import("express").Response} response - 200 { items, nextCursor },
+ *   with each post as toPublicRecommendation makes it.
+ * @param {{scope: "all"|"mine"|"friends"}} options - Whose posts to show:
+ *   everyone's, the user's own, or their steam friends'.
+ * @returns {Promise<void>}
+ */
 const getFeed = async (req, response, { scope }) => {
   const game =
     typeof req.query.game === "string"
@@ -95,18 +133,42 @@ const getFeed = async (req, response, { scope }) => {
   });
 };
 
+/**
+ * Checks that a value looks like a steam app id.
+ *
+ * @param {unknown} value - From the request.
+ * @returns {boolean} true if it's 1 to 10 digits.
+ */
 const isAppId = (value) => /^\d{1,10}$/.test(String(value ?? ""));
 
-//a store link like store.steampowered.com/app/620/... or a bare app id
+/**
+ * Gets an app id out of what the user typed in the game search.
+ *
+ * @param {string} text - A bare app id, or a store link like
+ *   store.steampowered.com/app/620/...
+ * @returns {string|null} The app id, or null if the text is neither.
+ */
 const parseAppId = (text) => {
   const trimmed = text.trim();
   if (isAppId(trimmed)) return trimmed;
   return trimmed.match(/store\.steampowered\.com\/app\/(\d{1,10})/i)?.[1] ?? null;
 };
 
-//games to pick from when writing a recommendation: any game can be
-//recommended, owned or not. a store link or app id looks that game up;
-//otherwise the user's library and games the site already knows are searched
+/**
+ * GET /recommendations/games. Lists games to pick from when writing a
+ * recommendation. Any game can be recommended, owned or not.
+ *
+ * A store link or app id looks that one game up. Otherwise it searches the
+ * user's library and the games the site already has cached, in parallel. Owned
+ * matches come first, most played first, then other cached games, up to 20.
+ * A library that can't be read is treated as empty.
+ *
+ * @param {import("express").Request} req - req.query.q: the search text (up to
+ *   100 characters). Needs req.user and req.steamApiKey.
+ * @param {import("express").Response} response - 200 with the matches: [{ id,
+ *   name, image }] for a direct lookup, otherwise [{ id, name, image, owned }].
+ * @returns {Promise<void>}
+ */
 const searchGames = async (req, response) => {
   const query = typeof req.query.q === "string" ? req.query.q.slice(0, 100) : "";
 
@@ -144,8 +206,17 @@ const searchGames = async (req, response) => {
   response.json([...results.values()].slice(0, MAX_GAME_RESULTS));
 };
 
-//the achievements a game has, marked with whether this user has unlocked them
-//used to pick which ones to highlight
+/**
+ * GET /recommendations/achievements. Lists a game's achievements, marked with
+ * whether this user has unlocked them, for picking which ones to highlight.
+ *
+ * @param {import("express").Request} req - req.query.appId: the game. Needs
+ *   req.user and req.steamApiKey.
+ * @param {import("express").Response} response - 200 with the achievements as
+ *   achievementOptions makes them; 400 { error } for an invalid app id;
+ *   404 { error } if steam has no record of the game.
+ * @returns {Promise<void>}
+ */
 const getGameAchievements = async (req, response) => {
   const { appId } = req.query;
   if (!isAppId(appId)) {
@@ -162,8 +233,21 @@ const getGameAchievements = async (req, response) => {
   response.json(options.achievements);
 };
 
-//game details plus its achievements with this player's unlock state
-//null if steam has no record of the game
+/**
+ * Gets a game's details and its achievements with this player's unlock state.
+ *
+ * Loads the game (getGamesInfo) and the player's achievements in it
+ * (spAchievementData) in parallel. Private or missing stats just mean nothing
+ * shows as unlocked.
+ *
+ * @param {string} key - The signed in user's steam api key.
+ * @param {string} steamId - The user's 64-bit steam id.
+ * @param {string} appId - The game's steam app id.
+ * @returns {Promise<{game: {id: number, name: string, image: string},
+ *   achievements: {apiName: string, name: string, description: string,
+ *   icon: string, iconGray: string, unlocked: boolean}[]}|null>} null if steam
+ *   has no record of the game.
+ */
 const achievementOptions = async (key, steamId, appId) => {
   const [[game], playerData] = await Promise.all([
     getGamesInfo(key, [appId]),
@@ -190,6 +274,30 @@ const achievementOptions = async (key, steamId, appId) => {
   };
 };
 
+/**
+ * POST /recommendations. Publishes a new recommendation.
+ *
+ * In order:
+ * 1. Checks the request: a game, a body of 1 to 4000 characters, an optional
+ *    score from 1 to 10, up to 10 highlighted achievements (each listed once,
+ *    with a comment of up to 500 characters and up to 2 images), and up to 4
+ *    post images, with no image used twice.
+ * 2. Checks every image is an unused upload of this user's.
+ * 3. Enforces the limit of 10 posts an hour.
+ * 4. Loads the game's achievements and the author's steam profile, and fills
+ *    in each highlight's name and icon from steam, not from the request.
+ * 5. Saves the post, then claims its images. If another request claimed an
+ *    image first, removes the post again and releases the images.
+ *
+ * @param {import("express").Request} req - req.body: { appId, body, score?,
+ *   images?, achievements?: [{ apiName, comment?, images? }] }. Needs req.user
+ *   and req.steamApiKey.
+ * @param {import("express").Response} response - 201 with the new post as
+ *   toPublicRecommendation makes it; 400 { error } if anything in the request
+ *   is invalid; 409 { error } if an image was claimed by another post;
+ *   429 { error } if posting too often; 502 { error } if steam couldn't find the game.
+ * @returns {Promise<void>}
+ */
 const createRecommendation = async (req, response) => {
   const { appId, body, achievements, score, images } = req.body ?? {};
 
@@ -269,6 +377,12 @@ const createRecommendation = async (req, response) => {
     });
   }
   const imageById = new Map(claimable.map((img) => [img.id, img]));
+  /**
+   * Swaps image ids for the { id, width, height } entries a post stores.
+   *
+   * @param {string[]} ids - Ids already checked by findClaimableImages.
+   * @returns {{id: string, width: number, height: number}[]}
+   */
   const imagesFor = (ids) => ids.map((id) => imageById.get(id));
 
   if (
@@ -333,6 +447,14 @@ const createRecommendation = async (req, response) => {
   response.status(201).json(toPublicRecommendation(doc, req.user._id));
 };
 
+/**
+ * DELETE /recommendations/:id. Deletes one of the user's own posts and its images.
+ *
+ * @param {import("express").Request} req - req.params.id: the post id. Needs req.user.
+ * @param {import("express").Response} response - 204 when deleted; 404 { error }
+ *   if it doesn't exist or someone else wrote it.
+ * @returns {Promise<void>}
+ */
 const removeRecommendation = async (req, response) => {
   const deleted = await deleteRecommendation(req.params.id, req.user._id);
   if (!deleted) {

@@ -4,6 +4,9 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * A styled label for a form field.
+ */
 function Label({ className, ...props }: React.ComponentProps<"label">) {
   return (
     <label

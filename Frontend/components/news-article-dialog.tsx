@@ -6,7 +6,10 @@ import { SteamArticleBody } from "@/components/steam-article-body";
 import { safeUrl } from "@/lib/steam-bbcode";
 import type { NewsItem } from "@/lib/types";
 
-//popup with a full news article, open whenever article isn't null
+/**
+ * A popup with a full news article: its title, author, date, formatted body
+ * and a link to read it on Steam. Open whenever article isn't null.
+ */
 export function NewsArticleDialog({
   article,
   gameName,

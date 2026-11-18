@@ -33,6 +33,11 @@ type Auth = {
 
 const AuthContext = createContext<Auth | null>(null);
 
+/**
+ * Keeps track of who is signed in and shares it with every component below it,
+ * through useAuth(). Loads the current user from the backend when the site
+ * opens, and provides the sign in, sign up, sign out and account update actions.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);

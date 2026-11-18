@@ -7,6 +7,10 @@ import { SteamApiKey } from "@/components/steam-api-key";
 import { SteamId } from "@/components/steam-id";
 import { useAuth } from "@/lib/auth";
 
+/**
+ * The /profile page: the signed in user's email, password change, Steam API key
+ * and Steam account. Sends signed out visitors to /sign-in.
+ */
 export default function ProfilePage() {
   const { user, loading } = useAuth();
   const router = useRouter();

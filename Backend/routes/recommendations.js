@@ -24,11 +24,29 @@ const {
 router.use(requireSameOrigin);
 router.use(express.json({ limit: "32kb" }));
 
-//passes rejected promises to the error handler below
+/**
+ * Wraps an async handler so its errors reach the error handler below instead
+ * of going unhandled.
+ *
+ * @param {Function} fn - An express handler or middleware that may return a promise.
+ * @returns {Function} A handler that calls fn and passes any rejection to next.
+ */
 const handle = (fn) => (req, response, next) =>
   Promise.resolve(fn(req, response, next)).catch(next);
 
-//writing or looking up games uses steam data, so it needs a key and steam id
+/**
+ * Middleware for routes that use the user's steam data: needs a signed in user
+ * with both an api key and a steam account saved.
+ *
+ * Runs requireSteamApiKey, then checks req.user.steamId.
+ *
+ * @param {import("express").Request} req - Sets req.user, req.sessionToken
+ *   and req.steamApiKey for the handlers after it.
+ * @param {import("express").Response} response - 401 { error } if signed out;
+ *   403 { error } without a key or a steam account.
+ * @param {Function} next - Called when the request may continue.
+ * @returns {void}
+ */
 const requireSteamAccount = (req, response, next) =>
   requireSteamApiKey(req, response, () => {
     if (!req.user.steamId) {
@@ -75,7 +93,18 @@ router.get("/images/:id", requireUser, handle(serveImage));
 router.delete("/images/:id", requireUser, handle(removeImage));
 router.delete("/:id", requireUser, handle(removeRecommendation));
 
-//never send error details back
+//each handler above is documented in controllers/recommendationsController.js
+//or controllers/recommendationImagesController.js
+
+/**
+ * Error handler for every /recommendations route. Never sends error details back.
+ *
+ * @param {Error} error - The error a handler threw; its message is logged.
+ * @param {import("express").Request} req
+ * @param {import("express").Response} response - 500 with a generic { error } message.
+ * @param {Function} next - Unused, but express needs four parameters to treat
+ *   this as an error handler.
+ */
 router.use((error, req, response, next) => {
   console.log("recommendations request failed: " + error.message);
   response

@@ -8,6 +8,9 @@ import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 const Select = SelectPrimitive.Root;
 
+/**
+ * A group of options inside a Select's list.
+ */
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
     <SelectPrimitive.Group
@@ -18,6 +21,9 @@ function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   );
 }
 
+/**
+ * The chosen option's text, shown in the SelectTrigger.
+ */
 function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
     <SelectPrimitive.Value
@@ -28,6 +34,9 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   );
 }
 
+/**
+ * The button that opens a Select's list, showing the current choice.
+ */
 function SelectTrigger({
   className,
   size = "default",
@@ -56,6 +65,9 @@ function SelectTrigger({
   );
 }
 
+/**
+ * The popup list of a Select's options.
+ */
 function SelectContent({
   className,
   children,
@@ -98,6 +110,9 @@ function SelectContent({
   );
 }
 
+/**
+ * A heading for a SelectGroup.
+ */
 function SelectLabel({
   className,
   ...props
@@ -111,6 +126,9 @@ function SelectLabel({
   );
 }
 
+/**
+ * One option in a Select's list, with a check mark when chosen.
+ */
 function SelectItem({
   className,
   children,
@@ -132,6 +150,9 @@ function SelectItem({
   );
 }
 
+/**
+ * A line between groups in a Select's list.
+ */
 function SelectSeparator({
   className,
   ...props
@@ -145,6 +166,9 @@ function SelectSeparator({
   );
 }
 
+/**
+ * An arrow at the top of a long Select list that scrolls it up.
+ */
 function SelectScrollUpButton({
   className,
   ...props
@@ -163,6 +187,9 @@ function SelectScrollUpButton({
   );
 }
 
+/**
+ * An arrow at the bottom of a long Select list that scrolls it down.
+ */
 function SelectScrollDownButton({
   className,
   ...props

@@ -4,6 +4,9 @@ import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * An on/off toggle switch (Base UI).
+ */
 function Switch({
   className,
   size = "default",

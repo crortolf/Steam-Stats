@@ -1,6 +1,9 @@
 import { Player } from "../lib/types";
 import Image from "next/image";
 
+/**
+ * A friend's small avatar and name, shown under a game on the Games & News page.
+ */
 export default function FriendCapsule({
   friendPlayer,
 }: {

@@ -40,6 +40,10 @@ const buttonVariants = cva(
   },
 )
 
+/**
+ * The site's button (Base UI), in several variants (default, outline, ghost,
+ * ...) and sizes. Can render as another element, ex: a Link.
+ */
 function Button({
   className,
   variant = 'default',

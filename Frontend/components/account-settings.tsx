@@ -11,6 +11,10 @@ import { Separator } from '@/components/ui/separator'
 
 type Visibility = 'public' | 'friends' | 'private'
 
+/**
+ * A tabbed settings form (profile, privacy, notifications) filled with mock
+ * data. Not used on any page yet, and nothing it shows is saved.
+ */
 export function AccountSettings() {
   const [displayName, setDisplayName] = useState(currentUser.name)
   const [realName, setRealName] = useState('Alex Rivera')
@@ -133,6 +137,9 @@ export function AccountSettings() {
   )
 }
 
+/**
+ * One setting in AccountSettings: a label and description with an on/off switch.
+ */
 function ToggleRow({
   label,
   desc,
@@ -155,6 +162,9 @@ function ToggleRow({
   )
 }
 
+/**
+ * The save button under each AccountSettings tab. It doesn't save anything yet.
+ */
 function SaveBar() {
   return (
     <div className="mt-2 flex items-center gap-3">

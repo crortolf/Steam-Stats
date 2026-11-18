@@ -16,6 +16,11 @@ const links = [
   { href: "/profile", label: "Profile" },
 ];
 
+/**
+ * The bar at the top of every page: the site's logo, links to each page (the
+ * current one highlighted), and the signed in user's email with a sign out
+ * button, or a sign in link. Collapses into a menu button on small screens.
+ */
 export function SiteNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);

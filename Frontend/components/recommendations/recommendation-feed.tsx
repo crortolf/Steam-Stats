@@ -19,8 +19,9 @@ const ENDPOINT_BY_SCOPE: Record<FeedScope, string> = {
 
 /**
  * A blog-style feed, newest first, that loads older posts as you scroll.
- * Remount it (change `key`) to start again from the newest post, e.g. after
- * posting a new recommendation.
+ * Shows everyone's posts, the viewer's Steam friends' posts, or only their
+ * own, optionally filtered by game title. Remount it (change `key`) to start
+ * again from the newest post, e.g. after posting a new recommendation.
  */
 export function RecommendationFeed({
   scope,

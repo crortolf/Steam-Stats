@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authErrorMessage, useAuth } from "@/lib/auth";
 
+/**
+ * The profile page's password section: a "Change password" button that opens a
+ * form for the current password and the new one twice. After a change, the
+ * user's other devices are signed out.
+ */
 export function PasswordReset() {
   const { changePassword } = useAuth();
   const [open, setOpen] = useState(false);

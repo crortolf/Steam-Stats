@@ -1,6 +1,10 @@
 import { GamesNews } from '@/components/games-news'
 import { RequireSteamKey } from '@/components/require-steam-key'
 
+/**
+ * The /games page: a heading over GamesNews (what friends are playing and each
+ * game's news), which only loads once the user has added their Steam API key and account.
+ */
 export default function GamesPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">

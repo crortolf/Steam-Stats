@@ -16,13 +16,35 @@ const sharp = require("sharp");
 const BACKEND_ORIGIN = process.env.BACKEND_ORIGIN ?? "http://localhost:5011";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-//a seeded random number generator, so every run makes the same mock data
 let rngState = 20261109;
+/**
+ * A seeded random number generator, so every run makes the same mock data.
+ *
+ * A linear congruential generator: each call advances rngState and scales it into [0, 1).
+ *
+ * @returns {number} A number from 0 (inclusive) to 1 (exclusive).
+ */
 const random = () => {
   rngState = (rngState * 1664525 + 1013904223) % 4294967296;
   return rngState / 4294967296;
 };
+/**
+ * Picks one random entry from a list.
+ *
+ * @param {Array} list - The list to pick from; must not be empty.
+ * @returns {*} One of its entries.
+ */
 const pick = (list) => list[Math.floor(random() * list.length)];
+/**
+ * Picks up to n different random entries from a list.
+ *
+ * Removes random entries from a copy until it has n or the copy runs out, so
+ * the list passed in isn't changed.
+ *
+ * @param {Array} list - The list to pick from.
+ * @param {number} n - How many to pick.
+ * @returns {Array} min(n, list.length) entries, in random order.
+ */
 const pickSome = (list, n) => {
   const copy = [...list];
   const out = [];
@@ -126,13 +148,32 @@ const LOCKED_COMMENTS = [
 
 // ---- generated pictures ----
 
+/**
+ * Makes text safe to put inside an SVG.
+ *
+ * @param {string} text - Text such as a game's name.
+ * @returns {string} The text with < > & " ' replaced by character references.
+ */
 const escapeXml = (text) =>
   text.replace(/[<>&"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
+/**
+ * Picks a random colour that's neither too pale nor too dark.
+ *
+ * @returns {string} An hsl() colour.
+ */
 const shade = () =>
   `hsl(${Math.floor(random() * 360)}, ${40 + Math.floor(random() * 40)}%, ${25 + Math.floor(random() * 40)}%)`;
 
-//a simple game-like scene: sky, hills, a sun or moon, and a little HUD
+/**
+ * Draws a fake 1280×720 game screenshot: a sky gradient, three layers of
+ * hills, a sun or moon, a health bar and minimap, and the game's name.
+ *
+ * Every shape's colour and position comes from random(), so each call differs.
+ *
+ * @param {string} gameName - Written in the bottom corner.
+ * @returns {string} The picture as SVG markup.
+ */
 const screenshotSvg = (gameName) => {
   const w = 1280;
   const h = 720;
@@ -164,7 +205,15 @@ const screenshotSvg = (gameName) => {
   </svg>`;
 };
 
-//an identicon-style avatar: a mirrored 5x5 grid in the user's colours
+/**
+ * Draws an identicon-style avatar: a 5×5 grid of squares, mirrored left to right.
+ *
+ * Fills each cell of the left three columns at random and copies it to the
+ * matching cell on the right.
+ *
+ * @param {[string, string]} colors - The background and square colours.
+ * @returns {string} A 184×184 picture as SVG markup.
+ */
 const avatarSvg = ([bg, fg]) => {
   const cells = [];
   for (let y = 0; y < 5; y++) {
@@ -181,6 +230,13 @@ const avatarSvg = ([bg, fg]) => {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="184" height="184"><rect width="184" height="184" fill="${bg}"/>${rects}</svg>`;
 };
 
+/**
+ * Renders SVG markup into a WebP image with sharp.
+ *
+ * @param {string} svg - The SVG markup.
+ * @returns {Promise<{data: Buffer, width: number, height: number}>} The image
+ *   bytes and size, ready for saveImage.
+ */
 const toWebp = async (svg) => {
   const { data, info } = await sharp(Buffer.from(svg))
     .webp({ quality: 80 })
@@ -200,7 +256,17 @@ const MAX_DOWNLOAD_BYTES = 2 * 1024 * 1024;
 const downloads = new Map();
 let downloadedBytes = 0;
 
-//fetches each url once per run; null if it isn't a steam cdn image or fails
+/**
+ * Downloads an image from steam's image cdn, at most once per url per run.
+ *
+ * Only https urls on steam's cdn hosts are fetched, whatever the cached urls
+ * say. The download must say it's an image and be at most 2 MB. Each url's
+ * promise is remembered, so asking again reuses the first download.
+ *
+ * @param {string} url - An image url from the Games cache.
+ * @returns {Promise<Buffer|null>} The bytes, or null if the url isn't allowed
+ *   or the download failed. Never rejects.
+ */
 const download = (url) => {
   if (!downloads.has(url)) {
     downloads.set(
@@ -228,6 +294,19 @@ const ACHIEVEMENT_W = 1280;
 const ACHIEVEMENT_H = 720;
 const ICON_SIZE = 256;
 
+/**
+ * Makes an "achievement unlocked" picture for a highlighted achievement.
+ *
+ * Downloads the game's banner and the achievement's icon, blurs and darkens
+ * the banner into a 1280×720 backdrop, then places the enlarged icon and the
+ * achievement's name on top.
+ *
+ * @param {object} game - The game from the Games cache; uses game.image.
+ * @param {object} achievement - The achievement from the game's schema; uses achievement.icon.
+ * @param {string} name - The achievement's display name, written under the icon.
+ * @returns {Promise<{data: Buffer, width: number, height: number}|null>} The
+ *   WebP picture, or null if either download failed.
+ */
 const achievementPicture = async (game, achievement, name) => {
   const [banner, icon] = await Promise.all([
     game.image ? download(game.image) : null,
@@ -265,6 +344,17 @@ const achievementPicture = async (game, achievement, name) => {
 
 // ---- writing it all ----
 
+/**
+ * Runs the script: removes the previous community mock data, then (unless
+ * --remove was given) writes new posts.
+ *
+ * Checks every game in POSTS is cached in Games, saves an avatar for each fake
+ * user, then writes each post with its generated screenshots and highlighted
+ * achievements (about half of the unlocked ones get a picture), dated across
+ * the last six weeks.
+ *
+ * @returns {Promise<void>} Rejects if a game in POSTS isn't cached yet.
+ */
 const main = async () => {
   const client = await mc.MongoClient.connect("mongodb://localhost:27017");
   const db = client.db("Steam-Stats");
@@ -291,6 +381,15 @@ const main = async () => {
     );
   }
 
+  /**
+   * Stores a generated picture as a mock image already attached to a post.
+   *
+   * @param {string} ownerId - The fake author's account id.
+   * @param {import("mongodb").ObjectId} postId - The post it belongs to.
+   * @param {{data: Buffer, width: number, height: number}} picture - A WebP image.
+   * @returns {Promise<{id: string, width: number, height: number}>} How the
+   *   post refers to the image.
+   */
   const saveImage = async (ownerId, postId, picture) => {
     const { insertedId } = await images.insertOne({
       ownerId,

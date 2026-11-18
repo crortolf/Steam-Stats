@@ -21,6 +21,11 @@ function scoreTone(score: number) {
   return "border-destructive/40 bg-destructive/15 text-destructive";
 }
 
+/**
+ * One recommendation in the feed: the author, game, score, text, images, and
+ * each highlighted achievement with the author's comment and images. The
+ * viewer's own posts get a delete button.
+ */
 export function RecommendationCard({
   recommendation: r,
   onDelete,
