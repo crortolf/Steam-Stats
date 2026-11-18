@@ -53,6 +53,11 @@ const defaultDirection: Record<SortKey, SortDirection> = {
   friends: "desc",
 };
 
+/**
+ * The Games & News page's content: the games the user's friends played
+ * recently, with who played each, sortable by name or number of friends.
+ * Selecting a game shows its GameNewsFeed.
+ */
 export function GamesNews() {
   //RequireSteamKey only renders this once the user has a steam id
   const steamId = useAuth().user?.steamId ?? null;

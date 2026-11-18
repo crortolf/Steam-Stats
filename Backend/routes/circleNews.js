@@ -12,6 +12,15 @@ const {
   requireSteamApiKey,
 } = require("../controllers/authController");
 
+/**
+ * GET /circleNews/getNews. The games a player's friends played recently, with
+ * who played each.
+ *
+ * @param {import("express").Request} req - req.query.id: the player's steam
+ *   id. Needs a signed in user with an api key.
+ * @param {import("express").Response} response - 200 with getNews' result;
+ *   500 { error } if it failed.
+ */
 router.get("/getNews", requireSteamApiKey, (req, response) => {
   getNews(req.steamApiKey, req.query.id)
     .then((result) => {
@@ -23,6 +32,18 @@ router.get("/getNews", requireSteamApiKey, (req, response) => {
     });
 });
 
+/**
+ * GET /circleNews/getNewsPage. One page of a game's news articles.
+ *
+ * Checks the query (a numeric app id, offset of 0 or more, count from 1 to
+ * 50), then loads the page with getNewsPage. News needs no api key, so only
+ * sign in is required.
+ *
+ * @param {import("express").Request} req - req.query: { appid, offset? (default
+ *   0), count? (default 5) }.
+ * @param {import("express").Response} response - 200 { news, hasMore };
+ *   400 { error } for an invalid query; 500 { error } if loading failed.
+ */
 router.get("/getNewsPage", requireUser, (req, response) => {
   const { appid } = req.query;
   const offset = Number(req.query.offset ?? 0);

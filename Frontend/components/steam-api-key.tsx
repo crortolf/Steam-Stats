@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authErrorMessage, useAuth } from "@/lib/auth";
 
-//shows the key hidden until asked for, with a form to add or replace it
+/**
+ * The profile page's Steam API key section: shows the saved key hidden (with a
+ * show/hide button), and a form to add or replace it. The backend checks the
+ * key with Steam before saving.
+ */
 export function SteamApiKey({ apiKey }: { apiKey: string | null }) {
   const { saveSteamApiKey } = useAuth();
   const [revealed, setRevealed] = useState(false);

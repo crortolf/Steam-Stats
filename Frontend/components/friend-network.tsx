@@ -86,6 +86,12 @@ const statusStroke: Record<FriendStatus, string> = {
   Snooze: "var(--status-Offline)",
 };
 
+/**
+ * The friend network graph: the user in the middle and their friends on rings
+ * around them (online friends nearest), with lines for friendships. Hovering
+ * or selecting a player highlights their connections, and selecting one shows
+ * their PlayerCard. Flagged players' avatars are pixelated.
+ */
 export function FriendNetwork() {
   //RequireSteamKey only renders this once the user has a steam id
   const steamId = useAuth().user?.steamId ?? null;

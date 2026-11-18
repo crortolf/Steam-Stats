@@ -8,6 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authErrorMessage, useAuth } from "@/lib/auth";
 
+/**
+ * The sign in and sign up form. In sign up mode it also asks for the password
+ * twice. Shows the server's error message on failure, and goes to /profile
+ * once the user is signed in.
+ */
 export function AuthForm({ mode }: { mode: "sign-in" | "sign-up" }) {
   const { user, signIn, signUp } = useAuth();
   const router = useRouter();

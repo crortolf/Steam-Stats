@@ -1,3 +1,6 @@
+//the backend's entry point: an express server on port 5011 that the frontend
+//calls. each url prefix is handled by one router in routes/, which passes the
+//work to controllers/ (request handling) and services/ (database and steam)
 const express = require("express");
 const cors = require("cors");
 const app = express();

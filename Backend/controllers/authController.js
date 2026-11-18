@@ -18,7 +18,19 @@ const { FRONTEND_ORIGIN } = require("../config");
 
 const SESSION_COOKIE = "session";
 
-//the session cookie is sent automatically, so only accept changes that come from our own site
+/**
+ * Middleware that blocks changes coming from other websites. The session cookie
+ * is sent automatically, so without this another site could make requests as the user.
+ *
+ * Lets every GET through. For other methods, rejects the request if the
+ * browser's Origin header names a site other than the frontend. Requests
+ * without an Origin (not from a browser page) are allowed.
+ *
+ * @param {import("express").Request} req - Reads req.method and the Origin header.
+ * @param {import("express").Response} response - Answers 403 { error } when blocked.
+ * @param {Function} next - Called when the request may continue.
+ * @returns {void}
+ */
 const requireSameOrigin = (req, response, next) => {
   const origin = req.headers.origin;
   if (
@@ -41,6 +53,12 @@ const FAILED_LOGIN_WINDOW_MS = 15 * 60 * 1000;
 //email -> { count, resetAt }, starts empty whenever the server restarts
 const failedLogins = new Map();
 
+/**
+ * Checks that a new password is acceptable.
+ *
+ * @param {unknown} password - The password from the request body.
+ * @returns {boolean} true if it's a string of 8 to 200 characters.
+ */
 const isValidPassword = (password) => {
   return (
     typeof password === "string" &&
@@ -49,11 +67,24 @@ const isValidPassword = (password) => {
   );
 };
 
+/**
+ * Puts an email into the form accounts are stored under, so "A@B.com " and
+ * "a@b.com" are the same account.
+ *
+ * @param {unknown} email - The email from the request body.
+ * @returns {string} The email trimmed and lowercased, or "" if it isn't a string.
+ */
 const normalizeEmail = (email) => {
   return typeof email === "string" ? email.trim().toLowerCase() : "";
 };
 
-//only what the frontend needs, never the password hash
+/**
+ * Picks the account details that are safe to send to the browser. Never the password hash.
+ *
+ * @param {object} user - A user document from the database.
+ * @returns {{email: string, steamApiKey: string|null, steamId: string|null}}
+ *   steamId is null for accounts made before steam ids were stored.
+ */
 const toPublicUser = (user) => {
   return {
     email: user._id,
@@ -63,6 +94,14 @@ const toPublicUser = (user) => {
   };
 };
 
+/**
+ * Reads the session token out of the request's cookies.
+ *
+ * Splits the Cookie header on ";" and returns the value of the "session" cookie.
+ *
+ * @param {import("express").Request} req - Reads the Cookie header.
+ * @returns {string|null} The token, or null if there's no session cookie.
+ */
 const readSessionToken = (req) => {
   for (const cookie of (req.headers.cookie ?? "").split(";")) {
     const [name, value] = cookie.trim().split("=");
@@ -71,6 +110,16 @@ const readSessionToken = (req) => {
   return null;
 };
 
+/**
+ * Signs a user in: creates a session and sets its cookie on the response.
+ *
+ * The cookie is httpOnly (page scripts can't read it), sameSite lax, secure in
+ * production, and lasts as long as the session.
+ *
+ * @param {import("express").Response} response - The response to set the cookie on.
+ * @param {string} email - The account to sign in.
+ * @returns {Promise<void>}
+ */
 const startSession = async (response, email) => {
   const token = await createSession(email);
   response.cookie(SESSION_COOKIE, token, {
@@ -81,6 +130,15 @@ const startSession = async (response, email) => {
   });
 };
 
+/**
+ * Checks whether an email is locked out after too many wrong passwords.
+ *
+ * Looks the email up in the in-memory failed login counts. A count whose
+ * 15-minute window has passed is removed and doesn't block.
+ *
+ * @param {string} email - The normalized email.
+ * @returns {boolean} true if there have been 10 or more failures in the current window.
+ */
 const isLoginBlocked = (email) => {
   const record = failedLogins.get(email);
   if (record === undefined) return false;
@@ -91,6 +149,15 @@ const isLoginBlocked = (email) => {
   return record.count >= MAX_FAILED_LOGINS;
 };
 
+/**
+ * Counts one wrong password for an email.
+ *
+ * Starts a new 15-minute window with a count of 1 if there's no current one,
+ * otherwise adds one to the count.
+ *
+ * @param {string} email - The normalized email.
+ * @returns {void}
+ */
 const recordFailedLogin = (email) => {
   const record = failedLogins.get(email);
   if (record === undefined || record.resetAt < Date.now()) {
@@ -103,6 +170,18 @@ const recordFailedLogin = (email) => {
   }
 };
 
+/**
+ * POST /auth/signup. Creates an account and signs the user in.
+ *
+ * Normalizes the email, checks it and the password, creates the user and
+ * starts a session.
+ *
+ * @param {import("express").Request} req - req.body: { email, password }.
+ * @param {import("express").Response} response - 201 with the public user and a
+ *   session cookie; 400 { error } for an invalid email or password; 409 { error }
+ *   if the email is taken.
+ * @returns {Promise<void>} Rejects on unexpected database errors.
+ */
 const signUp = async (req, response) => {
   const email = normalizeEmail(req.body?.email);
   const password = req.body?.password;
@@ -130,6 +209,19 @@ const signUp = async (req, response) => {
   }
 };
 
+/**
+ * POST /auth/login. Signs a user in with their email and password.
+ *
+ * Rejects oversized passwords without hashing them, refuses emails that are
+ * locked out, then checks the credentials. Wrong passwords are counted toward
+ * the lockout; a correct one clears the count and starts a session.
+ *
+ * @param {import("express").Request} req - req.body: { email, password }.
+ * @param {import("express").Response} response - 200 with the public user and a
+ *   session cookie; 401 { error } for a wrong email or password (the same
+ *   message either way); 429 { error } when locked out.
+ * @returns {Promise<void>}
+ */
 const logIn = async (req, response) => {
   const email = normalizeEmail(req.body?.email);
   const password = req.body?.password;
@@ -154,6 +246,15 @@ const logIn = async (req, response) => {
   response.json(toPublicUser(user));
 };
 
+/**
+ * POST /auth/logout. Signs the current session out.
+ *
+ * Deletes the session if there is one and clears the cookie either way.
+ *
+ * @param {import("express").Request} req - Reads the session cookie.
+ * @param {import("express").Response} response - Always 204 with no body.
+ * @returns {Promise<void>}
+ */
 const logOut = async (req, response) => {
   const token = readSessionToken(req);
   if (token) await deleteSession(token);
@@ -161,7 +262,18 @@ const logOut = async (req, response) => {
   response.status(204).end();
 };
 
-//loads the signed in user for the routes after it, answers 401 if there isn't one
+/**
+ * Middleware that only lets signed in users through, and loads who they are.
+ *
+ * Reads the session cookie and looks up its user.
+ *
+ * @param {import("express").Request} req - Reads the session cookie. Sets
+ *   req.user (the user document) and req.sessionToken for the handlers after it.
+ * @param {import("express").Response} response - Answers 401 { error } if
+ *   there's no current session.
+ * @param {Function} next - Called once the user is loaded.
+ * @returns {Promise<void>}
+ */
 const requireUser = async (req, response, next) => {
   const token = readSessionToken(req);
   const user = token ? await getSessionUser(token) : null;
@@ -173,7 +285,20 @@ const requireUser = async (req, response, next) => {
   next();
 };
 
-//for routes that call steam: every request uses the signed in user's own key
+/**
+ * Middleware for routes that call steam: only lets through signed in users who
+ * have saved an api key. Every steam request uses the user's own key.
+ *
+ * Runs requireUser first, then checks the user's key.
+ *
+ * @param {import("express").Request} req - Sets req.user, req.sessionToken and
+ *   req.steamApiKey for the handlers after it.
+ * @param {import("express").Response} response - Answers 401 { error } if
+ *   signed out, 403 { error } if there's no key.
+ * @param {Function} next - Called when the request may continue, or with an
+ *   error if loading the user failed.
+ * @returns {void}
+ */
 const requireSteamApiKey = (req, response, next) => {
   requireUser(req, response, () => {
     if (!req.user.steamApiKey) {
@@ -186,10 +311,29 @@ const requireSteamApiKey = (req, response, next) => {
   }).catch(next);
 };
 
+/**
+ * GET /auth/me. Tells the frontend who is signed in.
+ *
+ * @param {import("express").Request} req - Needs req.user from requireUser.
+ * @param {import("express").Response} response - 200 with the public user.
+ * @returns {void}
+ */
 const getMe = (req, response) => {
   response.json(toPublicUser(req.user));
 };
 
+/**
+ * Changes the signed in user's password and signs out their other sessions.
+ *
+ * Checks the new password, then the current one, saves the new hash, and
+ * deletes every session except this one.
+ *
+ * @param {import("express").Request} req - req.body: { currentPassword,
+ *   newPassword }. Needs req.user and req.sessionToken from requireUser.
+ * @param {import("express").Response} response - 204 when changed; 400 { error }
+ *   for an invalid new password; 401 { error } if the current password is wrong.
+ * @returns {Promise<void>}
+ */
 const changePassword = async (req, response) => {
   const { currentPassword, newPassword } = req.body ?? {};
 
@@ -213,6 +357,18 @@ const changePassword = async (req, response) => {
   response.status(204).end();
 };
 
+/**
+ * Saves the signed in user's steam api key, once steam has accepted it.
+ *
+ * Trims the key, checks it's 32 hex characters, and tries it with steam
+ * (isSteamApiKeyAccepted) before saving.
+ *
+ * @param {import("express").Request} req - req.body: { steamApiKey }. Needs req.user.
+ * @param {import("express").Response} response - 200 with the updated public
+ *   user; 400 { error } if the key is malformed or steam refuses it;
+ *   502 { error } if steam couldn't be reached.
+ * @returns {Promise<void>}
+ */
 const setSteamApiKey = async (req, response) => {
   const steamApiKey =
     typeof req.body?.steamApiKey === "string"
@@ -244,7 +400,19 @@ const setSteamApiKey = async (req, response) => {
 
 const MAX_STEAM_ID_INPUT_LENGTH = 200;
 
-//saves the steam account whose data the site shows to this user
+/**
+ * Saves the steam account whose data the site shows to this user.
+ *
+ * Accepts a steam id, profile url or custom url name, turns it into a steam id
+ * with resolveSteamId (custom names need the user's api key), and saves it.
+ *
+ * @param {import("express").Request} req - req.body: { steamId } (whatever the
+ *   user typed, up to 200 characters). Needs req.user.
+ * @param {import("express").Response} response - 200 with the updated public
+ *   user; 400 { error } if the input is empty, too long or can't be resolved;
+ *   502 { error } if steam couldn't be reached.
+ * @returns {Promise<void>}
+ */
 const setSteamId = async (req, response) => {
   const input =
     typeof req.body?.steamId === "string" ? req.body.steamId.trim() : "";

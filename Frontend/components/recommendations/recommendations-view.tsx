@@ -28,6 +28,11 @@ const EMPTY_MESSAGES: Record<FeedScope, string> = {
   mine: "You haven't recommended anything yet. Use the + button to write your first.",
 };
 
+/**
+ * The recommendations page's content: the Global/Friends toggle, the game
+ * title search and the feed, plus floating buttons to switch to your own posts
+ * and to write a new recommendation.
+ */
 export function RecommendationsView() {
   const [mine, setMine] = useState(false);
   // Kept while viewing your own posts, so going back returns to the same feed.

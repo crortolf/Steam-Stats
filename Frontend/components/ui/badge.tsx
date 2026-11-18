@@ -27,6 +27,10 @@ const badgeVariants = cva(
   }
 )
 
+/**
+ * A small rounded label, ex: "You" or a count. Comes in several colour
+ * variants and can render as another element (ex: a link).
+ */
 function Badge({
   className,
   variant = "default",

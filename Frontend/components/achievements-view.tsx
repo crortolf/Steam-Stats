@@ -28,6 +28,11 @@ export const per = (a: SumAchievementData) => {
     : 0;
 };
 
+/**
+ * The achievements page's content: a dropdown of the user's games, and the
+ * selected game's AchievementsPane. Loads the game list, then the selected
+ * game's achievements, showing loading and error messages for each.
+ */
 export function AchievementsView() {
   //RequireSteamKey only renders this once the user has a steam id
   const steamId = useAuth().user?.steamId ?? null;

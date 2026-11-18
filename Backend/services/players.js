@@ -12,8 +12,25 @@ const mongo = new mc.MongoClient("mongodb://localhost:27017", {
   },
 }).db("Steam-Stats");
 
-//players' names, avatars and libraries, cached per api key (see keyScope in
-//cache.js) so a library read with one user's key isn't shown to another user
+/**
+ * Gets several players' names, avatars and play time per game, from the cache
+ * when it's fresh and from steam otherwise.
+ *
+ * Looks each player up in the Players collection in parallel. Missing or stale
+ * records (see isStale) are fetched with retrievePlayerInfo and saved; if that
+ * fails, the failure is recorded and the stored record is used instead.
+ *
+ * Records are cached per api key (see keyScope in cache.js), so a library read
+ * with one user's key isn't shown to another user.
+ *
+ * @param {string} key - The signed in user's steam api key.
+ * @param {string[]} ids - 64-bit steam ids of the players.
+ * @returns {Promise<(object|null|undefined)[]>|undefined} One entry per id, in
+ *   the same order: { id, name, image, games } where games maps each app id to
+ *   { playtime, lastPlayed }, or null if steam has nothing for that player
+ *   (undefined if the database read failed). Returns undefined instead of a
+ *   promise if any id is undefined.
+ */
 const getPlayersInfo = (key, ids) => {
   const players = mongo.collection("Players");
   const playersData = [];
@@ -79,16 +96,39 @@ const getPlayersInfo = (key, ids) => {
 //steam's limit on ids per GetPlayerSummaries request
 const MAX_SUMMARIES_PER_REQUEST = 100;
 
-//the player id a per-key record is about
+/**
+ * Gets the player id back out of a per-key cache _id. The reverse of scopedId in cache.js.
+ *
+ * Keeps everything after the first ":".
+ *
+ * @param {string} _id - A cache _id shaped "<key scope>:<steam id>".
+ * @returns {string} The steam id.
+ */
 const unscopedId = (_id) => _id.slice(_id.indexOf(":") + 1);
 
-//returns steam's summary for each id that has one, reading the cache before asking steam
-//players without a summary are left out of the result
-//summaries are cached per api key (see keyScope in cache.js): steam hides more
-//of a profile from strangers than from friends, so a summary read with one
-//user's key is never shown to another user
-//maxAgeMs overrides how old a cached summary may be before steam is asked again
-//pass withUpdatedAt to keep each summary's updatedAt (when it was fetched from steam)
+/**
+ * Gets steam's profile summary (name, avatar, status, ...) for several players,
+ * reading the cache before asking steam.
+ *
+ * Reads all cached summaries for these ids in one query, works out which are
+ * missing or stale (see isStale), and asks steam for those in batches of up to
+ * 100 with requestPlayerSummaries. Fresh results replace the cached ones, then
+ * the summaries are returned in the order the ids were given.
+ *
+ * Summaries are cached per api key (see keyScope in cache.js): steam hides more
+ * of a profile from strangers than from friends, so a summary read with one
+ * user's key is never shown to another user.
+ *
+ * @param {string} key - The signed in user's steam api key.
+ * @param {string[]} ids - 64-bit steam ids of the players.
+ * @param {object} [options]
+ * @param {number} [options.maxAgeMs] - How old a cached summary may be before
+ *   steam is asked again. Defaults to a day.
+ * @param {boolean} [options.withUpdatedAt=false] - Keep each summary's
+ *   updatedAt (when it was fetched from steam).
+ * @returns {Promise<object[]>} { steamid, ...steam's summary fields } for each
+ *   player that has a summary, in the order of ids. Players without one are left out.
+ */
 const retrievePlayerSummaries = (
   key,
   ids,
@@ -137,8 +177,21 @@ const retrievePlayerSummaries = (
     });
 };
 
-//asks steam for one batch of summaries, caches the results under this key and
-//returns them as { steamid, ...summary, updatedAt }
+/**
+ * Asks steam for one batch of profile summaries and caches them under this key.
+ *
+ * Calls steam's GetPlayerSummaries with all the ids at once. Each returned
+ * summary is saved in the background with a new updatedAt. Ids steam leaves
+ * out (unknown accounts) are recorded as failures so they aren't asked for
+ * again for a while. If the whole request fails, every id is recorded as a
+ * failure and nothing is returned, so the caller falls back on stored data.
+ *
+ * @param {string} key - The signed in user's steam api key.
+ * @param {string[]} ids - Up to 100 steam ids (steam's limit per request).
+ * @param {import("mongodb").Collection} summaries - The PlayerSummaries collection.
+ * @returns {Promise<object[]>} { steamid, ...summary, updatedAt } for each player
+ *   steam returned; empty if the request failed. Never rejects.
+ */
 const requestPlayerSummaries = (key, ids, summaries) => {
   console.log("steam retreival for summaries of " + ids.length + " players");
   return axios
@@ -189,6 +242,22 @@ const requestPlayerSummaries = (key, ids, summaries) => {
     });
 };
 
+/**
+ * Builds one player's name, avatar and play time per game from steam. Always
+ * steam requests; getPlayersInfo caches the result.
+ *
+ * Gets the player's summary from GetPlayerSummaries, then their library with
+ * requestOwnedGames, and turns the library into a map from app id to play time.
+ * Errors are written to retreivePlayers.txt and logged.
+ *
+ * @param {string} key - The signed in user's steam api key.
+ * @param {string} id - The player's 64-bit steam id.
+ * @returns {Promise<object|undefined>} { id, name, image, games } where games
+ *   maps each app id to { playtime (minutes), lastPlayed (unix seconds) }:
+ *   - name, image and games are null if steam doesn't know the player
+ *   - games is an empty array if the library is hidden
+ *   - undefined if a request failed
+ */
 const retrievePlayerInfo = (key, id) => {
   return axios
     .get("https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/", {

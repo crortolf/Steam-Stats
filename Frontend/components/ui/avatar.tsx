@@ -5,6 +5,10 @@ import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * A round profile picture container (Base UI). Holds an AvatarImage and an
+ * AvatarFallback shown while the image loads or if it fails.
+ */
 function Avatar({
   className,
   size = "default",
@@ -25,6 +29,9 @@ function Avatar({
   )
 }
 
+/**
+ * The picture inside an Avatar.
+ */
 function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
   return (
     <AvatarPrimitive.Image
@@ -38,6 +45,9 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
   )
 }
 
+/**
+ * What an Avatar shows when its image is missing or still loading, ex: initials.
+ */
 function AvatarFallback({
   className,
   ...props
@@ -54,6 +64,9 @@ function AvatarFallback({
   )
 }
 
+/**
+ * A small badge pinned to the corner of an Avatar, ex: a status dot.
+ */
 function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
@@ -70,6 +83,9 @@ function AvatarBadge({ className, ...props }: React.ComponentProps<"span">) {
   )
 }
 
+/**
+ * Several Avatars overlapping in a row.
+ */
 function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -83,6 +99,9 @@ function AvatarGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+/**
+ * The "+3" bubble at the end of an AvatarGroup for avatars not shown.
+ */
 function AvatarGroupCount({
   className,
   ...props

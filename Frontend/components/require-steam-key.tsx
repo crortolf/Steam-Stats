@@ -4,8 +4,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useAuth } from "@/lib/auth";
 
-//only shows a page's content, and so makes its requests, once the user has a
-//steam api key and steam id, so children can rely on user.steamId being set
+/**
+ * Shows a page's content only once the user is signed in and has added a Steam
+ * API key and Steam account; otherwise links to where to do that. So the
+ * content (and its requests) can rely on user.steamId being set.
+ */
 export function RequireSteamKey({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const linkClass = "font-medium text-primary hover:underline";

@@ -11,6 +11,10 @@ type CapsuleGame = {
   [key: string]: unknown;
 };
 
+/**
+ * A game's banner image at Steam's capsule shape. Accepts either game shape the
+ * site uses (image/name or appImage/title), with a placeholder when there's no image.
+ */
 export function GameCapsule({
   game,
   lastPlayed,

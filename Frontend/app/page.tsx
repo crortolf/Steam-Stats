@@ -28,6 +28,10 @@ const features = [
   },
 ];
 
+/**
+ * The home page at /: a headline with a sign in button, cards linking to each
+ * part of the site, and a footer.
+ */
 export default function LandingPage() {
   return (
     <main>

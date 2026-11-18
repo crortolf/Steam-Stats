@@ -1,3 +1,7 @@
+/**
+ * Unfinished: meant to show a friend playing a game, but its body is code
+ * pasted in as text, and it isn't used anywhere.
+ */
 export function GameCard(game) {
   return (
     <div>

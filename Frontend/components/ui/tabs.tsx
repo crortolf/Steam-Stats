@@ -5,6 +5,9 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * A set of tabs (Base UI). Combine with TabsList, TabsTrigger and TabsContent.
+ */
 function Tabs({
   className,
   orientation = "horizontal",
@@ -38,6 +41,9 @@ const tabsListVariants = cva(
   }
 )
 
+/**
+ * The row of tab buttons.
+ */
 function TabsList({
   className,
   variant = "default",
@@ -53,6 +59,9 @@ function TabsList({
   )
 }
 
+/**
+ * One tab button.
+ */
 function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   return (
     <TabsPrimitive.Tab
@@ -69,6 +78,9 @@ function TabsTrigger({ className, ...props }: TabsPrimitive.Tab.Props) {
   )
 }
 
+/**
+ * The panel shown while its tab is selected.
+ */
 function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
     <TabsPrimitive.Panel

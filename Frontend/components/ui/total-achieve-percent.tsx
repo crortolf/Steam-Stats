@@ -1,6 +1,10 @@
 import { AchievementsData } from "@/lib/types";
 import { per } from "../achievements-view";
 
+/**
+ * One line saying how many of a game's achievements the user has unlocked,
+ * and what percentage that is.
+ */
 function TotalAchievePercent({ a }: { a: AchievementsData | null }) {
   return (
     <div>

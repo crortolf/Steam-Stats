@@ -96,6 +96,12 @@ type Props = {
   className?: string;
 };
 
+/**
+ * The details panel for the player selected in the friend network: avatar,
+ * name, status, country, current game, how long they've been friends with the
+ * user, and when they joined Steam and were last online. Cached between
+ * players, and refreshed from the backend once the data is five minutes old.
+ */
 export function PlayerCard({
   steamid,
   fallback,
@@ -343,6 +349,9 @@ export function PlayerCard({
   );
 }
 
+/**
+ * One labelled line in the PlayerCard, ex: "Friends for 6 years".
+ */
 function InfoRow({
   icon,
   label,

@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authErrorMessage, useAuth } from "@/lib/auth";
 
-//shows the account's steam id, with a form to add or change it
+/**
+ * The profile page's Steam account section: shows the saved Steam ID as a link
+ * to the profile, and a form to add or change it. Accepts a Steam ID, profile
+ * URL or custom URL name.
+ */
 export function SteamId({ steamId }: { steamId: string | null }) {
   const { saveSteamId } = useAuth();
   const [changing, setChanging] = useState(false);

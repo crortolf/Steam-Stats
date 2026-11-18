@@ -27,6 +27,11 @@ export const viewport: Viewport = {
   themeColor: "#171a21",
 };
 
+/**
+ * The frame around every page: sets the fonts and dark theme, provides the
+ * signed in user to every page (AuthProvider), and shows the navigation bar
+ * above the page's content. Vercel Analytics is only added in production.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
